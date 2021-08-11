@@ -1,11 +1,13 @@
 package com.codecool.dungeoncrawl.logic;
 
 import com.codecool.dungeoncrawl.logic.actors.Player;
+import com.codecool.dungeoncrawl.logic.utils.Inventory;
 
 public class GameMap {
     private int width;
     private int height;
     private Cell[][] cells;
+    private Inventory inventory;
 
     private Player player;
 
