@@ -8,7 +8,9 @@ import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.TextField;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
@@ -33,8 +35,27 @@ public class Main extends Application {
         ui.setPrefWidth(200);
         ui.setPadding(new Insets(10));
 
+        TextField textField = new TextField();
+        textField.setFocusTraversable(false);
+
+        Button button = new Button("Enter name");
+
+        // deletes text/input field and button
+        button.setOnAction(action -> {
+            String name = textField.getText();
+            ui.getChildren().remove(textField);
+            ui.getChildren().remove(button);
+            ui.add(new Label(name), 0, 3, 1, 1);
+        });
+
         ui.add(new Label("Health: "), 0, 0);
         ui.add(healthLabel, 1, 0);
+
+        ui.add(new Label(""), 0, 1); //empty space
+
+        ui.add(new Label("Character name: "), 0, 2); //
+        ui.add(textField, 0, 3, 2, 1);
+        ui.add(button, 0, 4, 2, 1);
 
         BorderPane borderPane = new BorderPane();
 
