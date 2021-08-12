@@ -63,15 +63,22 @@ public class Main extends Application {
         // deletes text/input field and button
         button.setOnAction(action -> {
             String name = textField.getText();
+            map.getPlayer().playerName = name;
             ui.getChildren().remove(textField);
             ui.getChildren().remove(button);
             ui.add(new Label(name), 0, 3, 1, 1);
         });
 
-        ui.add(new Label("Health: "), 0, 0);
-        ui.add(healthLabel, 1, 0);
-        ui.add(new Label("Strength: "), 0, 4);
-        ui.add(strengthLabel, 1, 4);
+        ui.add(new Label("Character name: "), 0, 0); //
+        ui.add(textField, 0, 1, 2, 1);
+        ui.add(button, 0, 2, 2, 1);
+
+        ui.add(new Label(""), 0, 3); //empty space
+
+        ui.add(new Label("Health: "), 0, 4);
+        ui.add(healthLabel, 1, 4);
+        ui.add(new Label("Strength: "), 0, 5);
+        ui.add(strengthLabel, 1, 5);
 
         inventoryUi.add(new Label("Inventory: "), 0, 0);
         inventoryUi.add(inventoryLabel, 5, 5);
@@ -80,13 +87,6 @@ public class Main extends Application {
         pickUpItem.setFocusTraversable(false);
         pickUpItem.setOnAction(itemEvent);
         pickUpItem.setVisible(false);
-
-
-        ui.add(new Label(""), 0, 1); //empty space
-
-        ui.add(new Label("Character name: "), 0, 2); //
-        ui.add(textField, 0, 3, 2, 1);
-        ui.add(button, 0, 4, 2, 1);
 
         BorderPane borderPane = new BorderPane();
 
@@ -149,6 +149,7 @@ public class Main extends Application {
             int oldStrength = map.getPlayer().getStrength();
             map2.getPlayer().setHealth(oldHealth);
             map2.getPlayer().setStrength(oldStrength);
+            map2.getPlayer().playerName = map.getPlayer().playerName;
             map = map2;
         }
     }

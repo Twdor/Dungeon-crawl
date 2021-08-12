@@ -7,6 +7,8 @@ import com.codecool.dungeoncrawl.logic.utils.Inventory;
 
 public class Player extends Actor {
     public Inventory inventory;
+    String[] developersNames = {"cipi", "adi", "cozmin"};
+    public String playerName;
 
 
     public Player(Cell cell) {
@@ -20,12 +22,22 @@ public class Player extends Actor {
         return inventory.getInventory().containsKey(cell.getType());
     }
 
+    private boolean isDevName() {
+        for (String name : developersNames) {
+            if (name.equalsIgnoreCase(playerName)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     @Override
     protected boolean isValidMove() {
         return nextCell.getType() == CellType.FLOOR
                 || nextCell.getType() == CellType.OPEN_DOOR
                 || isPlayerOnItem(nextCell)
-                || nextCell.getType() == CellType.STAIRS;
+                || nextCell.getType() == CellType.STAIRS
+                || isDevName();
     }
 
     public void tryToOpenDoor() {
