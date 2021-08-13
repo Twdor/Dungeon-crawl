@@ -46,6 +46,8 @@ public class Main extends Application {
 
     @Override
     public void start(Stage primaryStage) throws Exception {
+        context.scale(1.4, 1.4);
+
         GridPane ui = new GridPane();
         GridPane inventoryUi = new GridPane();
 
@@ -54,6 +56,10 @@ public class Main extends Application {
 
         ui.setPrefWidth(200);
         ui.setPadding(new Insets(10));
+
+        inventoryUi.add(new Label("Inventory: "), 0, 0);
+        inventoryUi.add(inventoryLabel, 5, 5);
+        inventoryUi.add(pickUpItem, 0, 10);
 
         TextField textField = new TextField();
         textField.setFocusTraversable(false);
@@ -75,18 +81,15 @@ public class Main extends Application {
 
         ui.add(new Label(""), 0, 3); //empty space
 
-        ui.add(new Label("Health: "), 0, 4);
+        ui.add(new Label("\nHealth: "), 0, 4);
         ui.add(healthLabel, 1, 4);
         ui.add(new Label("Strength: "), 0, 5);
         ui.add(strengthLabel, 1, 5);
 
-        inventoryUi.add(new Label("Inventory: "), 0, 0);
-        inventoryUi.add(inventoryLabel, 5, 5);
-
-        ui.add(pickUpItem, 1, 10);
         pickUpItem.setFocusTraversable(false);
         pickUpItem.setOnAction(itemEvent);
         pickUpItem.setVisible(false);
+
 
         BorderPane borderPane = new BorderPane();
 
@@ -109,9 +112,9 @@ public class Main extends Application {
         inventory.updateInventory(map.getPlayer().getCell().getType(), 1);
 
         if (target.getTileName().equals("armour")) {
-            map.getPlayer().setHealth(target.getType().getIncreaseValue());
+            map.getPlayer().setHealth(target.getActor().getHealth() + target.getType().getIncreaseValue());
         } else {
-            map.getPlayer().setStrength(map.getPlayer().getCell().getType().getIncreaseValue());
+            map.getPlayer().setStrength(target.getActor().getStrength() + target.getType().getIncreaseValue());
         }
 
         map.getPlayer().getCell().setType(CellType.FLOOR);
@@ -121,6 +124,8 @@ public class Main extends Application {
 
     private void onKeyPressed(KeyEvent keyEvent) {
         switch (keyEvent.getCode()) {
+            case ESCAPE:
+                System.exit(0);
             case UP:
                 step(0, -1);
                 refresh();
@@ -143,18 +148,20 @@ public class Main extends Application {
     private void step(int x, int y) {
         map.getPlayer().fight(x, y);
         map.getPlayer().move(x, y);
-        enemyMove();
+        if (!map.getPlayer().getCell().getNeighbor(x, y).isEnemy()) {
+            enemyMove();
+        }
         if (map.getPlayer().getX() == 27 && map.getPlayer().getY() == 22){
             int oldHealth = map.getPlayer().getHealth();
             int oldStrength = map.getPlayer().getStrength();
+            map2.getPlayer().playerName = map.getPlayer().playerName;
             map2.getPlayer().setHealth(oldHealth);
             map2.getPlayer().setStrength(oldStrength);
-            map2.getPlayer().playerName = map.getPlayer().playerName;
             map = map2;
         }
     }
 
-    private void enemyMove(String direction, Cell cell) {
+    private void enemyDirection(String direction, Cell cell) {
         switch (direction) {
             case "UP":
                 map.getCell(cell.getX(), cell.getY()).getActor().move(0, -1);
@@ -179,13 +186,17 @@ public class Main extends Application {
                 Cell cell = map.getCell(x, y);
                 if (cell.getActor() instanceof Skeleton) {
                     String direction = directions[random.nextInt(4)];
-                    enemyMove(direction, cell);
+                    enemyDirection(direction, cell);
                 }
             }
         }
     }
 
     private void refresh() {
+        if(map.getPlayer().getHealth() <= 0 || (map.getPlayer().getCell().getX() == 2 && map.getPlayer().getCell().getY() == 1)) {
+            map = MapLoader.loadMap(0);
+        }
+
         map.getPlayer().tryToOpenDoor();
         pickUpItem.setVisible(map.getPlayer().isPlayerOnItem(map.getPlayer().getCell()));
 
@@ -195,7 +206,7 @@ public class Main extends Application {
             for (int y = map.getPlayer().getY() - 50; y < map.getPlayer().getY() + 50; y++) {
                 Cell cell;
                 try {
-                    cell = map.getCell((x + map.getPlayer().getX()) - map.getHeight()/2, y + map.getPlayer().getY() - map.getWidth()/2);
+                    cell = map.getCell((x + map.getPlayer().getX()) - map.getHeight()/3, y + map.getPlayer().getY() - map.getWidth()/3);
                 } catch (IndexOutOfBoundsException e) {
                     cell = new Cell(map, 1, 1, CellType.EMPTY);
                 }
@@ -206,7 +217,7 @@ public class Main extends Application {
                 }
             }
         }
-        healthLabel.setText("" + map.getPlayer().getHealth());
+        healthLabel.setText("\n" + map.getPlayer().getHealth());
         inventoryLabel.setText("" + inventory);
         strengthLabel.setText("" + map.getPlayer().getStrength());
     }

@@ -12,8 +12,11 @@ public class MapLoader {
         InputStream is;
         if (level == 2) {
             is = MapLoader.class.getResourceAsStream("/map2.txt");
-        } else {
+        } else if (level == 1) {
             is = MapLoader.class.getResourceAsStream("/map.txt");
+        }
+        else {
+            is = MapLoader.class.getResourceAsStream("/gameover.txt");
         }
         Scanner scanner = new Scanner(is);
         int width = scanner.nextInt();
@@ -38,11 +41,11 @@ public class MapLoader {
                             cell.setType(CellType.FLOOR);
                             break;
                         case 's':
-                            cell.setType(CellType.FLOOR);
+                            cell.setType(CellType.ENEMY);
                             new Skeleton(cell);
                             break;
                         case 'g':
-                            cell.setType(CellType.FLOOR);
+                            cell.setType(CellType.ENEMY);
                             new Guard(cell);
                             break;
                         case 't':
@@ -80,6 +83,24 @@ public class MapLoader {
                             break;
                         case 'c':
                             cell.setType(CellType.CLOSED_DOOR);
+                            break;
+                        case 'F':
+                            cell.setType(CellType.FLAG);
+                            break;
+                        case '█':
+                            cell.setType(CellType.WALL);
+                            break;
+                        case '*':
+                            cell.setType(CellType.BARS);
+                            break;
+                        case 'B':
+                            cell.setType(CellType.BARREL);
+                            break;
+                        case 'C':
+                            cell.setType(CellType.CHEST);
+                            break;
+                        case 'l':
+                            cell.setType(CellType.LIGHT);
                             break;
                         case '@':
                             cell.setType(CellType.FLOOR);

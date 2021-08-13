@@ -13,8 +13,8 @@ public class Player extends Actor {
 
     public Player(Cell cell) {
         super(cell);
-        setHealth(15);
-        setStrength(50);
+        setHealth(1000);
+        setStrength(100);
         inventory = new Inventory();
     }
 
@@ -39,6 +39,22 @@ public class Player extends Actor {
                 || nextCell.getType() == CellType.STAIRS
                 || isDevName();
     }
+
+    public void fight(int dx, int dy){
+        Cell nextCell = cell.getNeighbor(dx, dy);
+        if (nextCell.isEnemy()) {
+            nextCell.getActor().setHealth(nextCell.getActor().getHealth()-getStrength());
+            setHealth(getHealth()-nextCell.getActor().getStrength());
+            if (nextCell.getActor().getHealth() <= 0) {
+                nextCell.setType(CellType.FLOOR);
+            } else if (getHealth() <= 0) {
+                cell.setType(CellType.FLOOR);
+                System.out.println("You Lose! Game over!");
+                System.exit(0);
+            }
+        }
+    }
+
 
     public void tryToOpenDoor() {
         nextCell = cell.getNeighbor(dx, dy);

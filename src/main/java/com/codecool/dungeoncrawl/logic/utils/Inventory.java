@@ -6,7 +6,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class Inventory {
-    Map<CellType, Integer> inventory;
+    static Map<CellType, Integer> inventory;
 
 
     public Inventory() {

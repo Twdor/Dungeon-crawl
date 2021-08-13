@@ -23,6 +23,10 @@ public abstract class Actor implements Drawable {
         this.dy = dy;
         nextCell = cell.getNeighbor(dx, dy);
         if (isValidMove()) {
+            if (cell.getType() == CellType.ENEMY) {
+                cell.setType(CellType.FLOOR);
+                nextCell.setType(CellType.ENEMY);
+            }
             cell.setActor(null);
             nextCell.setActor(this);
             cell = nextCell;
@@ -30,42 +34,12 @@ public abstract class Actor implements Drawable {
     }
 
     protected boolean isValidMove() {
-        return nextCell.getType() == CellType.FLOOR;
+        return nextCell.getType() == CellType.FLOOR && !nextCell.getType().getTileName().equals("player");
     }
 
-    public void fight(int dx, int dy){
-        Cell nextCell = cell.getNeighbor(dx, dy);
-        // enemy attack
-        if (nextCell.isPlayer() && cell.isEnemy()) {
-            attack(nextCell.getActor(), nextCell);
-        }
-        // player attack
-        if (nextCell.isEnemy() && cell.isPlayer()) {
-            attack(nextCell.getActor(), nextCell);
-        }
-    }
+    public void setHealth(int value) { health = value; }
 
-    public void attack(Actor actor, Cell cell) {
-        while (true) {
-            actor.setHealth(actor.getHealth() - this.strength);
-            if (actor.getHealth() < 0 || this.health < 0) {
-                break;
-            }
-            this.health = this.health - actor.getStrength();
-            if (actor.getHealth() < 0 || this.health < 0) {
-                break;
-            }
-        }
-        if (actor.getHealth() <= 0)  {
-            cell.setActor(null);
-        } else if (this.health <= 0 ){
-            cell.setActor(null);
-        }
-    }
-
-    public void setHealth(int value) { health += value; }
-
-    public void setStrength(int value) { strength += value; }
+    public void setStrength(int value) { strength = value; }
 
     public int getHealth() { return health; }
 

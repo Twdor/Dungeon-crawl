@@ -6,7 +6,7 @@ public enum CellType {
     WALL("wall"),
     KEY("key"),
     SWORD("sword", 10),
-    ARMOUR("armour", 5),
+    ARMOUR("armour", 100),
     CLOSED_DOOR("closed door"),
     OPEN_DOOR("open door"),
     TREE("tree"),
@@ -16,7 +16,13 @@ public enum CellType {
     PATH("path"),
     ENTRANCE("entrance"),
     GRASS("grass"),
-    STAIRS("stairs");
+    STAIRS("stairs"),
+    ENEMY("enemy"),
+    FLAG("flag"),
+    BARS("bars"),
+    BARREL("barrel"),
+    CHEST("chest"),
+    LIGHT("light");
 
     private final String tileName;
 
