@@ -1,9 +1,6 @@
 package com.codecool.dungeoncrawl;
 
-import com.codecool.dungeoncrawl.logic.Cell;
-import com.codecool.dungeoncrawl.logic.CellType;
-import com.codecool.dungeoncrawl.logic.GameMap;
-import com.codecool.dungeoncrawl.logic.MapLoader;
+import com.codecool.dungeoncrawl.logic.*;
 import com.codecool.dungeoncrawl.logic.utils.Inventory;
 import com.codecool.dungeoncrawl.logic.actors.Skeleton;
 import javafx.application.Application;
@@ -26,14 +23,13 @@ import java.util.Random;
 
 
 public class Main extends Application {
-    GameMap map1 = MapLoader.loadMap(1);
-    GameMap map2 = MapLoader.loadMap(2);
-    GameMap map = map1;
-    Inventory inventory = map.getPlayer().inventory;
+    GameMap map = MapLoader.loadMap(1, null);
     Canvas canvas = new Canvas(
             map.getWidth() * Tiles.TILE_WIDTH,
             map.getHeight() * Tiles.TILE_WIDTH);
     GraphicsContext context = canvas.getGraphicsContext2D();
+    double contextScale = 1.4;
+    int minX, minY, maxX, maxY;
     Label healthLabel = new Label();
     Label inventoryLabel = new Label();
     Label strengthLabel = new Label();
@@ -46,7 +42,7 @@ public class Main extends Application {
 
     @Override
     public void start(Stage primaryStage) throws Exception {
-        context.scale(1.4, 1.4);
+        context.scale(contextScale, contextScale);
 
         GridPane ui = new GridPane();
         GridPane inventoryUi = new GridPane();
@@ -107,43 +103,62 @@ public class Main extends Application {
     }
 
     EventHandler<ActionEvent> itemEvent = actionEvent -> {
-        Cell target = map.getPlayer().getCell();
+        Cell cell = map.getPlayer().getCell();
 
-        inventory.updateInventory(map.getPlayer().getCell().getType(), 1);
+        Inventory.setInventory(cell.getItem().getName(), 1);
 
-        if (target.getTileName().equals("armour")) {
-            map.getPlayer().setHealth(target.getActor().getHealth() + target.getType().getIncreaseValue());
+        if (cell.getTileName().equals("armour")) {
+            map.getPlayer().setHealth(cell.getActor().getHealth() + cell.getItem().getIncreaseValue());
         } else {
-            map.getPlayer().setStrength(target.getActor().getStrength() + target.getType().getIncreaseValue());
+            map.getPlayer().setStrength(cell.getActor().getStrength() + cell.getItem().getIncreaseValue());
         }
 
-        map.getPlayer().getCell().setType(CellType.FLOOR);
+        cell.deleteItem();
         refresh();
         pickUpItem.setVisible(false);
     };
-
     private void onKeyPressed(KeyEvent keyEvent) {
         switch (keyEvent.getCode()) {
-            case ESCAPE:
-                System.exit(0);
             case UP:
-                step(0, -1);
+                map.getPlayer().move(0, -1);
                 refresh();
                 break;
             case DOWN:
-                step(0, 1);
+                map.getPlayer().move(0, 1);
                 refresh();
                 break;
             case LEFT:
-                step(-1, 0);
+                map.getPlayer().move(-1, 0);
                 refresh();
                 break;
             case RIGHT:
-                step(1,0);
+                map.getPlayer().move(1,0);
                 refresh();
                 break;
         }
     }
+//    private void onKeyPressed(KeyEvent keyEvent) {
+//        switch (keyEvent.getCode()) {
+//            case ESCAPE:
+//                System.exit(0);
+//            case UP:
+//                step(0, -1);
+//                refresh();
+//                break;
+//            case DOWN:
+//                step(0, 1);
+//                refresh();
+//                break;
+//            case LEFT:
+//                step(-1, 0);
+//                refresh();
+//                break;
+//            case RIGHT:
+//                step(1,0);
+//                refresh();
+//                break;
+//        }
+//    }
 
     private void step(int x, int y) {
         map.getPlayer().fight(x, y);
@@ -151,14 +166,14 @@ public class Main extends Application {
         if (!map.getPlayer().getCell().getNeighbor(x, y).isEnemy()) {
             enemyMove();
         }
-        if (map.getPlayer().getX() == 27 && map.getPlayer().getY() == 22){
-            int oldHealth = map.getPlayer().getHealth();
-            int oldStrength = map.getPlayer().getStrength();
-            map2.getPlayer().playerName = map.getPlayer().playerName;
-            map2.getPlayer().setHealth(oldHealth);
-            map2.getPlayer().setStrength(oldStrength);
-            map = map2;
-        }
+//        if (map.getPlayer().getX() == 27 && map.getPlayer().getY() == 22){
+//            int oldHealth = map.getPlayer().getHealth();
+//            int oldStrength = map.getPlayer().getStrength();
+//            map2.getPlayer().playerName = map.getPlayer().playerName;
+//            map2.getPlayer().setHealth(oldHealth);
+//            map2.getPlayer().setStrength(oldStrength);
+//            map = map2;
+//        }
     }
 
     private void enemyDirection(String direction, Cell cell) {
@@ -192,33 +207,40 @@ public class Main extends Application {
         }
     }
 
-    private void refresh() {
-        if(map.getPlayer().getHealth() <= 0 || (map.getPlayer().getCell().getX() == 2 && map.getPlayer().getCell().getY() == 1)) {
-            map = MapLoader.loadMap(0);
-        }
+    private void setBounds() {
+        minX = (int) (map.getPlayer().getX()-((map.getWidth()/contextScale-1)/2));
+        minY = (int) (map.getPlayer().getY()-((map.getHeight()/contextScale-1)/2));
+        maxX = (int) (map.getPlayer().getX()+((map.getWidth()/contextScale+1)/2));
+        maxY = (int) (map.getPlayer().getY()+((map.getHeight()/contextScale+2)/2));
 
-        map.getPlayer().tryToOpenDoor();
-        pickUpItem.setVisible(map.getPlayer().isPlayerOnItem(map.getPlayer().getCell()));
+        if (minX < 0) { maxX -= minX; minX = 0; }
+        if (maxX > map.getWidth()-1) { maxX = map.getWidth()-1; minX = (int) (map.getWidth()-1 - map.getWidth()/contextScale); }
+        if (minY <= 0) { maxY -= minY-1; minY = 0; }
+        if (maxY > map.getHeight()-1) { maxY = map.getHeight()-1; minY = (int) (map.getHeight()-1 - map.getHeight()/contextScale); }
+    }
+
+    private void refresh() {
+        map = map.getPlayer().isPlayerOnStairs() ? MapLoader.loadMap(2, map.getPlayer()) : map.getPlayer().isDead() ? MapLoader.loadMap(0, null) : map;
+        pickUpItem.setVisible(map.getPlayer().isPlayerOnItem());
 
         context.setFill(Color.BLACK);
         context.fillRect(0, 0, canvas.getWidth(), canvas.getHeight());
-        for (int x = map.getPlayer().getX() - 50; x < map.getPlayer().getX() + 50; x++) {
-            for (int y = map.getPlayer().getY() - 50; y < map.getPlayer().getY() + 50; y++) {
-                Cell cell;
-                try {
-                    cell = map.getCell((x + map.getPlayer().getX()) - map.getHeight()/3, y + map.getPlayer().getY() - map.getWidth()/3);
-                } catch (IndexOutOfBoundsException e) {
-                    cell = new Cell(map, 1, 1, CellType.EMPTY);
-                }
+
+        setBounds();
+        for (int x = minX; x < maxX; x++) {
+            for (int y = minY; y < maxY; y++) {
+                Cell cell = map.getCell(x, y);
                 if (cell.getActor() != null) {
-                    Tiles.drawTile(context, cell.getActor(), x, y);
+                    Tiles.drawTile(context, cell.getActor(), x - minX, y -minY);
+                } else if (cell.getItem() != null) {
+                    Tiles.drawTile(context, cell.getItem(),x - minX, y -minY);
                 } else {
-                    Tiles.drawTile(context, cell, x, y);
+                    Tiles.drawTile(context, cell,x - minX, y -minY);
                 }
             }
         }
         healthLabel.setText("\n" + map.getPlayer().getHealth());
-        inventoryLabel.setText("" + inventory);
+        inventoryLabel.setText("" + Inventory.getInventoryToString());
         strengthLabel.setText("" + map.getPlayer().getStrength());
     }
 }
