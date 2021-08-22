@@ -1,35 +1,43 @@
 package com.codecool.dungeoncrawl.logic.utils;
 
-import com.codecool.dungeoncrawl.logic.CellType;
 
 import java.util.HashMap;
 import java.util.Map;
 
 public class Inventory {
-    static Map<CellType, Integer> inventory;
+    public static Map<Item, Integer> inventory = new HashMap<>();
+    public static Map<String, Item> allPossibleItems;
+    private static boolean isPossibleItems = false;
 
 
-    public Inventory() {
-        inventory = new HashMap<>();
-        inventory.put(CellType.ARMOUR, 0);
-        inventory.put(CellType.SWORD, 0);
-        inventory.put(CellType.KEY, 0);
+    private static void createAllPossibleItems() {
+        allPossibleItems = new HashMap<>();
+        allPossibleItems.put("sword", new Sword("sword", 10));
+        allPossibleItems.put("key", new Key("key", 0));
+        allPossibleItems.put("armour", new Armour("armour", 100));
+        isPossibleItems = true;
     }
 
-    public void updateInventory(CellType item, int value) {
-        inventory.put(item, inventory.get(item)+value);
+    public static int getKeyAmount() {
+        return inventory.get(allPossibleItems.get("key"));
     }
 
-
-    public Map<CellType, Integer> getInventory() {
-        return inventory;
+    public static void setInventory(String itemName, int amount) {
+        if (!isPossibleItems) {
+            createAllPossibleItems();
+        }
+        Item item = allPossibleItems.get(itemName);
+        int value = 0;
+        try {
+            value = inventory.get(item);
+        } catch (Exception ignored) {}
+        inventory.put(item, value+amount);
     }
 
-    @Override
-    public String toString() {
+    public static String getInventoryToString() {
         StringBuilder sb = new StringBuilder("\n");
-        for (CellType item : inventory.keySet()) {
-            sb.append(item.getTileName()).append("  ").append(inventory.get(item)).append("\n\n");
+        for (Item item : inventory.keySet()) {
+            sb.append(item.getName()).append("  ").append(inventory.get(item)).append("\n\n");
         }
 
         return sb.toString();

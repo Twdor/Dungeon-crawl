@@ -4,9 +4,6 @@ public enum CellType {
     EMPTY("empty"),
     FLOOR("floor"),
     WALL("wall"),
-    KEY("key"),
-    SWORD("sword", 10),
-    ARMOUR("armour", 100),
     CLOSED_DOOR("closed door"),
     OPEN_DOOR("open door"),
     TREE("tree"),
@@ -26,15 +23,12 @@ public enum CellType {
 
     private final String tileName;
 
-    private int increaseValue;
 
     CellType(String tileName) { this.tileName = tileName; }
 
-    CellType(String tileName, int increaseValue) { this.tileName = tileName; this.increaseValue = increaseValue; }
 
     public String getTileName() {
         return tileName;
     }
 
-    public int getIncreaseValue() { return increaseValue; }
 }
