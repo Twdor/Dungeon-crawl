@@ -12,7 +12,7 @@ public class Player extends Actor {
 
     public Player(Cell cell) {
         super(cell);
-        health = 1000;
+        health = 10;
         strength = 100;
     }
 

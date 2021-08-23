@@ -3,13 +3,13 @@ package com.codecool.dungeoncrawl;
 import com.codecool.dungeoncrawl.logic.actors.Actor;
 import com.codecool.dungeoncrawl.logic.utils.Cell;
 import com.codecool.dungeoncrawl.logic.utils.items.Inventory;
+import com.codecool.dungeoncrawl.menus.GameOverMenu;
+import com.codecool.dungeoncrawl.menus.MainMenu;
 import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
-//import com.codecool.dungeoncrawl.dao.GameDatabaseManager;
 import com.codecool.dungeoncrawl.logic.GameMap;
 import com.codecool.dungeoncrawl.logic.MapLoader;
-import com.codecool.dungeoncrawl.logic.actors.Player;
 import javafx.application.Application;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
@@ -17,10 +17,6 @@ import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
-import javafx.scene.control.TextField;
-import javafx.scene.input.KeyCode;
-import javafx.scene.input.KeyCodeCombination;
-import javafx.scene.input.KeyCombination;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
@@ -29,9 +25,6 @@ import javafx.stage.Stage;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.util.Duration;
-import java.sql.SQLException;
-
-
 
 
 
@@ -53,6 +46,9 @@ public class Main extends Application {
     Button pickUpItem = new Button("pickUp");
     boolean isKeyPressed = false;
     boolean isAtLeastOneEnemyAlive = true;
+    Stage stage;
+    GameOverMenu gameOverMenu;
+    Scene scene;
 
 //    GameDatabaseManager dbManager;
 
@@ -60,9 +56,25 @@ public class Main extends Application {
         launch(args);
     }
 
+    public GameMap getMap() { return map; }
+
+    public Canvas getCanvas() { return canvas; }
+
+    public Stage getStage() { return stage; }
+
     @Override
-    public void start(Stage primaryStage) throws Exception {
+    public void start(Stage primaryStage) {
         context.scale(contextScale, contextScale);
+        this.stage = primaryStage;
+
+        MainMenu menu = new MainMenu(this);
+        menu.handleMenu();
+    }
+
+
+    public void createScene(String characterName) {
+        map = MapLoader.loadMap(1, null);
+        map.getPlayer().setPlayerName(characterName);
 
         GridPane ui = new GridPane();
         GridPane inventoryUi = new GridPane();
@@ -77,23 +89,10 @@ public class Main extends Application {
         inventoryUi.add(inventoryLabel, 5, 5);
         inventoryUi.add(pickUpItem, 0, 10);
 
-        TextField textField = new TextField();
-        textField.setFocusTraversable(false);
 
-        Button button = new Button("Enter name");
-
-        // deletes text/input field and button
-        button.setOnAction(action -> {
-            String name = textField.getText();
-            map.getPlayer().setPlayerName(name);
-            ui.getChildren().remove(textField);
-            ui.getChildren().remove(button);
-            ui.add(new Label(name), 0, 3, 1, 1);
-        });
+        ui.add(new Label(characterName), 0, 3, 1, 1);
 
         ui.add(new Label("Character name: "), 0, 0); //
-        ui.add(textField, 0, 1, 2, 1);
-        ui.add(button, 0, 2, 2, 1);
 
         ui.add(new Label(""), 0, 3); //empty space
 
@@ -106,23 +105,27 @@ public class Main extends Application {
         pickUpItem.setOnAction(itemEvent);
         pickUpItem.setVisible(false);
 
-//        setupDbManager();
-
         BorderPane borderPane = new BorderPane();
 
         borderPane.setCenter(canvas);
         borderPane.setRight(ui);
         borderPane.setLeft(inventoryUi);
 
-        Scene scene = new Scene(borderPane);
-        primaryStage.setScene(scene);
+        scene = new Scene(borderPane);
+    }
+
+
+    public void startGame() {
+        gameOverMenu = new GameOverMenu(this);
+
+        stage.setScene(scene);
         enemyRefresh();
         refresh();
         scene.setOnKeyPressed(this::onKeyPressed);
 
 
-        primaryStage.setTitle("Dungeon Crawl");
-        primaryStage.show();
+        stage.setTitle("Dungeon Crawl");
+        stage.show();
     }
 
     public void enemyRefresh() {
@@ -130,9 +133,13 @@ public class Main extends Application {
         timeline.play();
     }
 
+    public void stopEnemiesRefresh() {
+        timeline.stop();
+    }
+
     private void moveEnemies() {
         if (map.getEnemies().size() == 0) {
-            timeline.stop();
+            stopEnemiesRefresh();
             isAtLeastOneEnemyAlive = false;
             return;
         }
@@ -215,6 +222,7 @@ public class Main extends Application {
     }
 
     private void refresh() {
+        if (map.getPlayer().isDead()) { gameOverMenu.handleMenu(); return; }
         if (map.getPlayer().isPlayerOnStairs()) {
             map = MapLoader.loadMap(2, map.getPlayer());
             enemyRefresh();
@@ -223,7 +231,6 @@ public class Main extends Application {
 
         if (!isKeyPressed && isAtLeastOneEnemyAlive) moveEnemies();
 
-//        map = map.getPlayer().isPlayerOnStairs() ? MapLoader.loadMap(2, map.getPlayer()) : map.getPlayer().isDead() ? MapLoader.loadMap(0, null) : map;
         pickUpItem.setVisible(map.getPlayer().isPlayerOnItem());
 
         context.setFill(Color.BLACK);

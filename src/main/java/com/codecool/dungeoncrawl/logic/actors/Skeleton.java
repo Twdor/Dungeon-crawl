@@ -48,20 +48,6 @@ public class Skeleton extends Enemy {
         coordinates.put("RIGHT", new int[] {1, 0});
     }
 
-    private int[] getCoordinates(String direction) {
-        switch (direction) {
-            case "UP":
-                return new int[] {0, -1};
-            case "DOWN":
-                return new int[] {0, 1};
-            case "LEFT":
-                return new int[] {-1, 0};
-            case "RIGHT":
-                return new int[] {1, 0};
-        }
-        return null;
-    }
-
     private boolean isPlayerNear() {
         boolean isPlayerNear = false;
         for (String direction : coordinates.keySet()) {
