@@ -1,12 +1,15 @@
 package com.codecool.dungeoncrawl;
 
-import com.codecool.dungeoncrawl.logic.*;
 import com.codecool.dungeoncrawl.logic.actors.Actor;
 import com.codecool.dungeoncrawl.logic.utils.Cell;
 import com.codecool.dungeoncrawl.logic.utils.items.Inventory;
 import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
+//import com.codecool.dungeoncrawl.dao.GameDatabaseManager;
+import com.codecool.dungeoncrawl.logic.GameMap;
+import com.codecool.dungeoncrawl.logic.MapLoader;
+import com.codecool.dungeoncrawl.logic.actors.Player;
 import javafx.application.Application;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
@@ -15,6 +18,9 @@ import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyCodeCombination;
+import javafx.scene.input.KeyCombination;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
@@ -23,6 +29,11 @@ import javafx.stage.Stage;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.util.Duration;
+import java.sql.SQLException;
+
+
+
+
 
 
 public class Main extends Application {
@@ -43,6 +54,7 @@ public class Main extends Application {
     boolean isKeyPressed = false;
     boolean isAtLeastOneEnemyAlive = true;
 
+//    GameDatabaseManager dbManager;
 
     public static void main(String[] args) {
         launch(args);
@@ -94,6 +106,7 @@ public class Main extends Application {
         pickUpItem.setOnAction(itemEvent);
         pickUpItem.setVisible(false);
 
+//        setupDbManager();
 
         BorderPane borderPane = new BorderPane();
 
@@ -121,12 +134,14 @@ public class Main extends Application {
         if (map.getEnemies().size() == 0) {
             timeline.stop();
             isAtLeastOneEnemyAlive = false;
-            return; }
+            return;
+        }
         try {
             for (Actor enemy : map.getEnemies()) {
                 enemy.move(0, 0);
             }
-        } catch (Exception ignored) {}
+        } catch (Exception ignored) {
+        }
 
     }
 
@@ -145,29 +160,30 @@ public class Main extends Application {
         refresh();
         pickUpItem.setVisible(false);
     };
+
     private void onKeyPressed(KeyEvent keyEvent) {
         switch (keyEvent.getCode()) {
             case UP:
                 if (map.getPlayer().getY() != 0)
-                map.getPlayer().move(0, -1);
+                    map.getPlayer().move(0, -1);
                 isKeyPressed = true;
                 refresh();
                 break;
             case DOWN:
-                if (map.getPlayer().getY() != map.getHeight()-2)
-                map.getPlayer().move(0, 1);
+                if (map.getPlayer().getY() != map.getHeight() - 2)
+                    map.getPlayer().move(0, 1);
                 isKeyPressed = true;
                 refresh();
                 break;
             case LEFT:
                 if (map.getPlayer().getX() != 0)
-                map.getPlayer().move(-1, 0);
+                    map.getPlayer().move(-1, 0);
                 isKeyPressed = true;
                 refresh();
                 break;
             case RIGHT:
-                if (map.getPlayer().getX() != map.getWidth()-2)
-                map.getPlayer().move(1,0);
+                if (map.getPlayer().getX() != map.getWidth() - 2)
+                    map.getPlayer().move(1, 0);
                 isKeyPressed = true;
                 refresh();
                 break;
@@ -175,15 +191,27 @@ public class Main extends Application {
     }
 
     private void setBounds() {
-        minX = (int) (map.getPlayer().getX()-((map.getWidth()/contextScale-1)/2));
-        minY = (int) (map.getPlayer().getY()-((map.getHeight()/contextScale-1)/2));
-        maxX = (int) (map.getPlayer().getX()+((map.getWidth()/contextScale+1)/2));
-        maxY = (int) (map.getPlayer().getY()+((map.getHeight()/contextScale+2)/2));
+        minX = (int) (map.getPlayer().getX() - ((map.getWidth() / contextScale - 1) / 2));
+        minY = (int) (map.getPlayer().getY() - ((map.getHeight() / contextScale - 1) / 2));
+        maxX = (int) (map.getPlayer().getX() + ((map.getWidth() / contextScale + 1) / 2));
+        maxY = (int) (map.getPlayer().getY() + ((map.getHeight() / contextScale + 2) / 2));
 
-        if (minX < 0) { maxX -= minX; minX = 0; }
-        if (maxX > map.getWidth()-1) { maxX = map.getWidth()-1; minX = (int) (map.getWidth()-1 - map.getWidth()/contextScale); }
-        if (minY <= 0) { maxY -= minY-1; minY = 0; }
-        if (maxY > map.getHeight()-1) { maxY = map.getHeight()-1; minY = (int) (map.getHeight()-1 - map.getHeight()/contextScale); }
+        if (minX < 0) {
+            maxX -= minX;
+            minX = 0;
+        }
+        if (maxX > map.getWidth() - 1) {
+            maxX = map.getWidth() - 1;
+            minX = (int) (map.getWidth() - 1 - map.getWidth() / contextScale);
+        }
+        if (minY <= 0) {
+            maxY -= minY - 1;
+            minY = 0;
+        }
+        if (maxY > map.getHeight() - 1) {
+            maxY = map.getHeight() - 1;
+            minY = (int) (map.getHeight() - 1 - map.getHeight() / contextScale);
+        }
     }
 
     private void refresh() {
@@ -209,9 +237,9 @@ public class Main extends Application {
                 if (cell.getActor() != null) {
                     Tiles.drawTile(context, cell.getActor(), x - minX, y - minY);
                 } else if (cell.getItem() != null) {
-                    Tiles.drawTile(context, cell.getItem(),x - minX, y -minY);
+                    Tiles.drawTile(context, cell.getItem(), x - minX, y - minY);
                 } else {
-                    Tiles.drawTile(context, cell,x - minX, y -minY);
+                    Tiles.drawTile(context, cell, x - minX, y - minY);
                 }
             }
         }
@@ -220,5 +248,24 @@ public class Main extends Application {
         strengthLabel.setText("" + map.getPlayer().getStrength());
 
         isKeyPressed = !isKeyPressed;
+
+
+//        private void setupDbManager () {
+//            dbManager = new GameDatabaseManager();
+//            try {
+//                dbManager.setup();
+//            } catch (SQLException ex) {
+//                System.out.println("Cannot connect to database.");
+//            }
+//        }
+//
+//        private void exit () {
+//            try {
+//                stop();
+//            } catch (Exception e) {
+//                System.exit(1);
+//            }
+//            System.exit(0);
+//        }
     }
 }

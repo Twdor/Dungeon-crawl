@@ -16,6 +16,7 @@ public class GameMap {
     private List<Actor> enemies = new ArrayList<>();
     private int level;
 
+
     private Player player;
 
     public GameMap(int width, int height, CellType defaultCellType) {

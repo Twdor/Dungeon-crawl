@@ -8,11 +8,10 @@ public class Guard extends Enemy {
         super(cell);
         health = 300;
         strength = 50;
-//        setHealth(500);
-//        setStrength(40);
+
     }
 
-//
+
     @Override
     public String getTileName() {
         return "guard";

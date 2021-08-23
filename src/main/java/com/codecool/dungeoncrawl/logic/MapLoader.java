@@ -17,10 +17,10 @@ public class MapLoader {
             is = MapLoader.class.getResourceAsStream("/map2.txt");
         } else if (level == 1) {
             is = MapLoader.class.getResourceAsStream("/map.txt");
-        }
-        else {
+        } else {
             is = MapLoader.class.getResourceAsStream("/gameover.txt");
         }
+
         Scanner scanner = new Scanner(is);
         int width = scanner.nextInt();
         int height = scanner.nextInt();
@@ -122,5 +122,4 @@ public class MapLoader {
         }
         return map;
     }
-
 }

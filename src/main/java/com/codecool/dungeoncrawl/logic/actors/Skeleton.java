@@ -76,5 +76,6 @@ public class Skeleton extends Enemy {
 
         }
         return isPlayerNear;
+
     }
 }
