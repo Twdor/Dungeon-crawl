@@ -1,15 +1,21 @@
 package com.codecool.dungeoncrawl.logic.actors;
 
-import com.codecool.dungeoncrawl.logic.Cell;
+import com.codecool.dungeoncrawl.logic.utils.Cell;
 
-public class Enemy extends Actor{
+
+public abstract class Enemy extends Actor {
 
     public Enemy(Cell cell) {
         super(cell);
     }
 
     @Override
-    public String getTileName() {
-        return "enemy";
+    public void move(int dx, int dy) {
     }
+
+    @Override
+    public String getTileName() {
+        return null;
+    }
+
 }

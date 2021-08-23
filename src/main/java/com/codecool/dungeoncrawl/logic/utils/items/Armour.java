@@ -1,6 +1,8 @@
-package com.codecool.dungeoncrawl.logic.utils;
+package com.codecool.dungeoncrawl.logic.utils.items;
 
-public class Armour extends Item{
+import com.codecool.dungeoncrawl.logic.utils.items.Item;
+
+public class Armour extends Item {
 
     public Armour(String name, int increaseValue) {
         super(name, increaseValue);

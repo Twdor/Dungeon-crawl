@@ -1,7 +1,9 @@
-package com.codecool.dungeoncrawl.logic;
+package com.codecool.dungeoncrawl.logic.utils;
 
+import com.codecool.dungeoncrawl.logic.Drawable;
+import com.codecool.dungeoncrawl.logic.GameMap;
 import com.codecool.dungeoncrawl.logic.actors.*;
-import com.codecool.dungeoncrawl.logic.utils.Item;
+import com.codecool.dungeoncrawl.logic.utils.items.Item;
 
 public class Cell implements Drawable {
     private CellType type;
@@ -43,6 +45,8 @@ public class Cell implements Drawable {
         return gameMap.getCell(x + dx, y + dy);
     }
 
+    public void removeEnemy(Actor enemy) { gameMap.removeEnemy((Enemy) enemy); }
+
     @Override
     public String getTileName() {
         return type.getTileName();
@@ -54,10 +58,6 @@ public class Cell implements Drawable {
 
     public int getY() {
         return y;
-    }
-
-    public boolean isEnemy() {
-        return this.actor instanceof Enemy;
     }
 
 }

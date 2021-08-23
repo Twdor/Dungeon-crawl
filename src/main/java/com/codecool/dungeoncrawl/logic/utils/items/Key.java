@@ -1,4 +1,4 @@
-package com.codecool.dungeoncrawl.logic.utils;
+package com.codecool.dungeoncrawl.logic.utils.items;
 
 public class Key extends Item{
 

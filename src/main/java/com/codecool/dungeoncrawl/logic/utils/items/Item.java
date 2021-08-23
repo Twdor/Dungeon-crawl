@@ -1,4 +1,4 @@
-package com.codecool.dungeoncrawl.logic.utils;
+package com.codecool.dungeoncrawl.logic.utils.items;
 
 import com.codecool.dungeoncrawl.logic.Drawable;
 

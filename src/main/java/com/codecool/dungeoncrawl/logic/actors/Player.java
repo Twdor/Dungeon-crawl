@@ -1,71 +1,73 @@
 package com.codecool.dungeoncrawl.logic.actors;
 
-import com.codecool.dungeoncrawl.logic.Cell;
-import com.codecool.dungeoncrawl.logic.CellType;
-import com.codecool.dungeoncrawl.logic.utils.Inventory;
+import com.codecool.dungeoncrawl.logic.utils.Cell;
+import com.codecool.dungeoncrawl.logic.utils.CellType;
+import com.codecool.dungeoncrawl.logic.utils.DevNames;
+import com.codecool.dungeoncrawl.logic.utils.items.Inventory;
 
 
 public class Player extends Actor {
-    public Inventory inventory;
-    String[] developersNames = {"cipi", "adi", "cozmin"};
-    public String playerName;
+    private String playerName;
 
 
     public Player(Cell cell) {
         super(cell);
-        setHealth(1000);
-        setStrength(100);
-        inventory = new Inventory();
+        health = 1000;
+        strength = 100;
     }
 
-    public boolean isPlayerOnItem(Cell cell) {
-        return inventory.getInventory().containsKey(cell.getType());
+    public Player(Cell cell, int health, int strength, String name) {
+        super(cell);
+        this.health = health;
+        this.strength = strength;
+        playerName = name;
+    }
+
+    public void setPlayerName(String playerName) { this.playerName = playerName; }
+
+    public String getPlayerName() { return playerName; }
+
+    @Override
+    public void move(int dx, int dy) {
+        nextCell = cell.getNeighbor(dx, dy);
+        tryToOpenDoor();
+
+        if (!isEnemy() && (isDevName() || isValidMove()))  setMovement();
+        else if (isEnemy()) fight();
+    }
+
+    public boolean isPlayerOnItem() {
+        return cell.getItem() != null;
     }
 
     private boolean isDevName() {
-        for (String name : developersNames) {
-            if (name.equalsIgnoreCase(playerName)) {
-                return true;
-            }
+        for (DevNames value : DevNames.values()) {
+            if (value.toString().equals(playerName.toUpperCase())) return true;
         }
         return false;
     }
 
-    @Override
-    protected boolean isValidMove() {
+    private boolean isValidMove() {
         return nextCell.getType() == CellType.FLOOR
                 || nextCell.getType() == CellType.OPEN_DOOR
-                || isPlayerOnItem(nextCell)
-                || nextCell.getType() == CellType.STAIRS
-                || isDevName();
-    }
-
-    public void fight(int dx, int dy){
-        Cell nextCell = cell.getNeighbor(dx, dy);
-        if (nextCell.isEnemy()) {
-            nextCell.getActor().setHealth(nextCell.getActor().getHealth()-getStrength());
-            setHealth(getHealth()-nextCell.getActor().getStrength());
-            if (nextCell.getActor().getHealth() <= 0) {
-                nextCell.setType(CellType.FLOOR);
-            } else if (getHealth() <= 0) {
-                cell.setType(CellType.FLOOR);
-                System.out.println("You Lose! Game over!");
-                System.exit(0);
-            }
-        }
+                || isPlayerOnItem()
+                || nextCell.getType() == CellType.STAIRS;
     }
 
 
     public void tryToOpenDoor() {
-        nextCell = cell.getNeighbor(dx, dy);
         if (nextCell.getType().equals(CellType.CLOSED_DOOR) && playerHasKey()) {
             nextCell.setType(CellType.OPEN_DOOR);
-            inventory.updateInventory(CellType.KEY, -1);
+            Inventory.setInventory("key", -1);
         }
     }
-    
+
+    public boolean isPlayerOnStairs() {
+        return cell.getType().equals(CellType.STAIRS);
+    }
+
     private boolean playerHasKey() {
-        return inventory.getInventory().get(CellType.KEY) > 0;
+        return Inventory.getKeyAmount() > 0;
     }
 
     public String getTileName() {

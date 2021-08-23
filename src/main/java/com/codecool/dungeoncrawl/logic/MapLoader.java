@@ -3,12 +3,15 @@ package com.codecool.dungeoncrawl.logic;
 import com.codecool.dungeoncrawl.logic.actors.Guard;
 import com.codecool.dungeoncrawl.logic.actors.Player;
 import com.codecool.dungeoncrawl.logic.actors.Skeleton;
+import com.codecool.dungeoncrawl.logic.utils.*;
+import com.codecool.dungeoncrawl.logic.utils.items.Inventory;
 
 import java.io.InputStream;
 import java.util.Scanner;
 
+
 public class MapLoader {
-    public static GameMap loadMap(int level) {
+    public static GameMap loadMap(int level, Player player) {
         InputStream is;
         if (level == 2) {
             is = MapLoader.class.getResourceAsStream("/map2.txt");
@@ -35,17 +38,18 @@ public class MapLoader {
                             cell.setType(CellType.EMPTY);
                             break;
                         case '#':
+                        case '█':
                             cell.setType(CellType.WALL);
                             break;
                         case '.':
                             cell.setType(CellType.FLOOR);
                             break;
                         case 's':
-                            cell.setType(CellType.ENEMY);
-                            new Skeleton(cell);
+                            cell.setType(CellType.FLOOR);
+                            map.setEnemies(new Skeleton(cell));
                             break;
                         case 'g':
-                            cell.setType(CellType.ENEMY);
+                            cell.setType(CellType.FLOOR);
                             new Guard(cell);
                             break;
                         case 't':
@@ -73,22 +77,25 @@ public class MapLoader {
                             cell.setType(CellType.GRASS);
                             break;
                         case 'S':
-                            cell.setType(CellType.SWORD);
+                            cell.setType(CellType.FLOOR);
+                            Inventory.setInventory("sword", 0);
+                            cell.setItem(Inventory.allPossibleItems.get("sword"));
                             break;
                         case 'k':
-                            cell.setType(CellType.KEY);
+                            cell.setType(CellType.FLOOR);
+                            Inventory.setInventory("key", 0);
+                            cell.setItem(Inventory.allPossibleItems.get("key"));
                             break;
                         case 'a':
-                            cell.setType(CellType.ARMOUR);
+                            cell.setType(CellType.FLOOR);
+                            Inventory.setInventory("armour", 0);
+                            cell.setItem(Inventory.allPossibleItems.get("armour"));
                             break;
                         case 'c':
                             cell.setType(CellType.CLOSED_DOOR);
                             break;
                         case 'F':
                             cell.setType(CellType.FLAG);
-                            break;
-                        case '█':
-                            cell.setType(CellType.WALL);
                             break;
                         case '*':
                             cell.setType(CellType.BARS);
@@ -104,7 +111,8 @@ public class MapLoader {
                             break;
                         case '@':
                             cell.setType(CellType.FLOOR);
-                            map.setPlayer(new Player(cell));
+                            map.setPlayer(player == null ? new Player(cell)
+                                    : new Player(cell, player.getHealth(), player.getStrength(), player.getPlayerName()));
                             break;
                         default:
                             throw new RuntimeException("Unrecognized character: '" + line.charAt(x) + "'");

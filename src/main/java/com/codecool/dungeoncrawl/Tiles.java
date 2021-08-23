@@ -24,16 +24,17 @@ public class Tiles {
 
     static {
         tileMap.put("empty", new Tile(0, 0));
+        tileMap.put("dead", new Tile(14, 10));
         tileMap.put("wall", new Tile(10, 17));
         tileMap.put("floor", new Tile(2, 0));
-        tileMap.put("player", new Tile(27, 0));
-        tileMap.put("enemy skeleton", new Tile(29, 6));
+        tileMap.put("player", new Tile(30, 2));
+        tileMap.put("skeleton", new Tile(29, 6));
         tileMap.put("sword", new Tile(0, 30));
         tileMap.put("armour", new Tile(6, 23));
         tileMap.put("key", new Tile(16, 23));
         tileMap.put("closed door", new Tile(3, 4));
         tileMap.put("open door", new Tile(4, 4));
-        tileMap.put("enemy guard", new Tile(31, 0));
+        tileMap.put("guard", new Tile(31, 0));
         tileMap.put("tree", new Tile(4, 2));
         tileMap.put("window", new Tile(12, 17));
         tileMap.put("fence", new Tile(2, 3));

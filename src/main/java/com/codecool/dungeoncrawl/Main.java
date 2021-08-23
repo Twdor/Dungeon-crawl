@@ -1,8 +1,12 @@
 package com.codecool.dungeoncrawl;
 
 import com.codecool.dungeoncrawl.logic.*;
-import com.codecool.dungeoncrawl.logic.utils.Inventory;
-import com.codecool.dungeoncrawl.logic.actors.Skeleton;
+import com.codecool.dungeoncrawl.logic.actors.Actor;
+import com.codecool.dungeoncrawl.logic.utils.Cell;
+import com.codecool.dungeoncrawl.logic.utils.items.Inventory;
+import javafx.animation.Animation;
+import javafx.animation.KeyFrame;
+import javafx.animation.Timeline;
 import javafx.application.Application;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
@@ -18,8 +22,7 @@ import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
-
-import java.util.Random;
+import javafx.util.Duration;
 
 
 public class Main extends Application {
@@ -28,12 +31,17 @@ public class Main extends Application {
             map.getWidth() * Tiles.TILE_WIDTH,
             map.getHeight() * Tiles.TILE_WIDTH);
     GraphicsContext context = canvas.getGraphicsContext2D();
+    Timeline timeline = new Timeline(
+            new KeyFrame(Duration.millis(500),
+                    event -> refresh()));
     double contextScale = 1.4;
     int minX, minY, maxX, maxY;
     Label healthLabel = new Label();
     Label inventoryLabel = new Label();
     Label strengthLabel = new Label();
     Button pickUpItem = new Button("pickUp");
+    boolean isKeyPressed = false;
+    boolean isAtLeastOneEnemyAlive = true;
 
 
     public static void main(String[] args) {
@@ -65,7 +73,7 @@ public class Main extends Application {
         // deletes text/input field and button
         button.setOnAction(action -> {
             String name = textField.getText();
-            map.getPlayer().playerName = name;
+            map.getPlayer().setPlayerName(name);
             ui.getChildren().remove(textField);
             ui.getChildren().remove(button);
             ui.add(new Label(name), 0, 3, 1, 1);
@@ -95,11 +103,31 @@ public class Main extends Application {
 
         Scene scene = new Scene(borderPane);
         primaryStage.setScene(scene);
+        enemyRefresh();
         refresh();
         scene.setOnKeyPressed(this::onKeyPressed);
 
+
         primaryStage.setTitle("Dungeon Crawl");
         primaryStage.show();
+    }
+
+    public void enemyRefresh() {
+        timeline.setCycleCount(Animation.INDEFINITE);
+        timeline.play();
+    }
+
+    private void moveEnemies() {
+        if (map.getEnemies().size() == 0) {
+            timeline.stop();
+            isAtLeastOneEnemyAlive = false;
+            return; }
+        try {
+            for (Actor enemy : map.getEnemies()) {
+                enemy.move(0, 0);
+            }
+        } catch (Exception ignored) {}
+
     }
 
     EventHandler<ActionEvent> itemEvent = actionEvent -> {
@@ -120,90 +148,29 @@ public class Main extends Application {
     private void onKeyPressed(KeyEvent keyEvent) {
         switch (keyEvent.getCode()) {
             case UP:
+                if (map.getPlayer().getY() != 0)
                 map.getPlayer().move(0, -1);
+                isKeyPressed = true;
                 refresh();
                 break;
             case DOWN:
+                if (map.getPlayer().getY() != map.getHeight()-2)
                 map.getPlayer().move(0, 1);
+                isKeyPressed = true;
                 refresh();
                 break;
             case LEFT:
+                if (map.getPlayer().getX() != 0)
                 map.getPlayer().move(-1, 0);
+                isKeyPressed = true;
                 refresh();
                 break;
             case RIGHT:
+                if (map.getPlayer().getX() != map.getWidth()-2)
                 map.getPlayer().move(1,0);
+                isKeyPressed = true;
                 refresh();
                 break;
-        }
-    }
-//    private void onKeyPressed(KeyEvent keyEvent) {
-//        switch (keyEvent.getCode()) {
-//            case ESCAPE:
-//                System.exit(0);
-//            case UP:
-//                step(0, -1);
-//                refresh();
-//                break;
-//            case DOWN:
-//                step(0, 1);
-//                refresh();
-//                break;
-//            case LEFT:
-//                step(-1, 0);
-//                refresh();
-//                break;
-//            case RIGHT:
-//                step(1,0);
-//                refresh();
-//                break;
-//        }
-//    }
-
-    private void step(int x, int y) {
-        map.getPlayer().fight(x, y);
-        map.getPlayer().move(x, y);
-        if (!map.getPlayer().getCell().getNeighbor(x, y).isEnemy()) {
-            enemyMove();
-        }
-//        if (map.getPlayer().getX() == 27 && map.getPlayer().getY() == 22){
-//            int oldHealth = map.getPlayer().getHealth();
-//            int oldStrength = map.getPlayer().getStrength();
-//            map2.getPlayer().playerName = map.getPlayer().playerName;
-//            map2.getPlayer().setHealth(oldHealth);
-//            map2.getPlayer().setStrength(oldStrength);
-//            map = map2;
-//        }
-    }
-
-    private void enemyDirection(String direction, Cell cell) {
-        switch (direction) {
-            case "UP":
-                map.getCell(cell.getX(), cell.getY()).getActor().move(0, -1);
-                break;
-            case "DOWN":
-                map.getCell(cell.getX(), cell.getY()).getActor().move(0, 1);
-                break;
-            case "LEFT":
-                map.getCell(cell.getX(), cell.getY()).getActor().move(-1, 0);
-                break;
-            case "RIGHT":
-                map.getCell(cell.getX(), cell.getY()).getActor().move(1, 0);
-                break;
-        }
-    }
-
-    private void enemyMove() {
-        String[] directions = {"UP", "DOWN", "LEFT", "RIGHT"};
-        Random random = new Random();
-        for (int x = 0; x < map.getWidth(); x++) {
-            for (int y = 0; y < map.getHeight(); y++) {
-                Cell cell = map.getCell(x, y);
-                if (cell.getActor() instanceof Skeleton) {
-                    String direction = directions[random.nextInt(4)];
-                    enemyDirection(direction, cell);
-                }
-            }
         }
     }
 
@@ -220,18 +187,27 @@ public class Main extends Application {
     }
 
     private void refresh() {
-        map = map.getPlayer().isPlayerOnStairs() ? MapLoader.loadMap(2, map.getPlayer()) : map.getPlayer().isDead() ? MapLoader.loadMap(0, null) : map;
+        if (map.getPlayer().isPlayerOnStairs()) {
+            map = MapLoader.loadMap(2, map.getPlayer());
+            enemyRefresh();
+            isAtLeastOneEnemyAlive = true;
+        }
+
+        if (!isKeyPressed && isAtLeastOneEnemyAlive) moveEnemies();
+
+//        map = map.getPlayer().isPlayerOnStairs() ? MapLoader.loadMap(2, map.getPlayer()) : map.getPlayer().isDead() ? MapLoader.loadMap(0, null) : map;
         pickUpItem.setVisible(map.getPlayer().isPlayerOnItem());
 
         context.setFill(Color.BLACK);
         context.fillRect(0, 0, canvas.getWidth(), canvas.getHeight());
 
         setBounds();
+
         for (int x = minX; x < maxX; x++) {
             for (int y = minY; y < maxY; y++) {
                 Cell cell = map.getCell(x, y);
                 if (cell.getActor() != null) {
-                    Tiles.drawTile(context, cell.getActor(), x - minX, y -minY);
+                    Tiles.drawTile(context, cell.getActor(), x - minX, y - minY);
                 } else if (cell.getItem() != null) {
                     Tiles.drawTile(context, cell.getItem(),x - minX, y -minY);
                 } else {
@@ -242,5 +218,7 @@ public class Main extends Application {
         healthLabel.setText("\n" + map.getPlayer().getHealth());
         inventoryLabel.setText("" + Inventory.getInventoryToString());
         strengthLabel.setText("" + map.getPlayer().getStrength());
+
+        isKeyPressed = !isKeyPressed;
     }
 }

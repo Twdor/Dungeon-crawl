@@ -1,4 +1,4 @@
-package com.codecool.dungeoncrawl.logic;
+package com.codecool.dungeoncrawl.logic.utils;
 
 public enum CellType {
     EMPTY("empty"),
@@ -14,7 +14,6 @@ public enum CellType {
     ENTRANCE("entrance"),
     GRASS("grass"),
     STAIRS("stairs"),
-    ENEMY("enemy"),
     FLAG("flag"),
     BARS("bars"),
     BARREL("barrel"),
@@ -29,6 +28,22 @@ public enum CellType {
 
     public String getTileName() {
         return tileName;
+    }
+
+    public boolean isWalkable(){
+        switch (this) {
+            case FLOOR:
+            case OPEN_DOOR:
+            case STAIRS:
+                return true;
+//            case EMPTY:
+//            case WALL:
+//            case CLOSED_DOOR:
+//            case LIGHT:
+//            case CHEST:
+//                return false;
+        }
+        return false;
     }
 
 }

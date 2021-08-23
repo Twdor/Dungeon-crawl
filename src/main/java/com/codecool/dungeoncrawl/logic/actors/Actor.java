@@ -1,45 +1,25 @@
 package com.codecool.dungeoncrawl.logic.actors;
 
-import com.codecool.dungeoncrawl.logic.Cell;
-import com.codecool.dungeoncrawl.logic.CellType;
+import com.codecool.dungeoncrawl.logic.utils.Cell;
 import com.codecool.dungeoncrawl.logic.Drawable;
 
 public abstract class Actor implements Drawable {
     protected Cell cell;
-    private int health;
-    private int strength;
+    protected int health;
+    protected int strength;
     protected Cell nextCell;
-    protected int dx;
-    protected int dy;
-
+    public boolean isInFightMode = false;
 
     public Actor(Cell cell) {
         this.cell = cell;
         this.cell.setActor(this);
     }
 
-    public void move(int dx, int dy) {
-        this.dx = dx;
-        this.dy = dy;
-        nextCell = cell.getNeighbor(dx, dy);
-        if (isValidMove()) {
-            if (cell.getType() == CellType.ENEMY) {
-                cell.setType(CellType.FLOOR);
-                nextCell.setType(CellType.ENEMY);
-            }
-            cell.setActor(null);
-            nextCell.setActor(this);
-            cell = nextCell;
-        }
-    }
+    public abstract void move(int dx, int dy);
 
-    protected boolean isValidMove() {
-        return nextCell.getType() == CellType.FLOOR && !nextCell.getType().getTileName().equals("player");
-    }
+    public void setHealth(int value) { health += value; }
 
-    public void setHealth(int value) { health = value; }
-
-    public void setStrength(int value) { strength = value; }
+    public void setStrength(int value) { strength += value; }
 
     public int getHealth() { return health; }
 
@@ -55,5 +35,34 @@ public abstract class Actor implements Drawable {
 
     public int getY() {
         return cell.getY();
+    }
+
+    protected void setMovement() {
+        cell.setActor(null);
+        nextCell.setActor(this);
+        cell = nextCell;
+    }
+
+    protected void fight() {
+        if (nextCell.getActor().isDead()) {
+            nextCell.getActor().die();
+            isInFightMode = false;
+            return;
+        } else if (cell.getActor().isDead()) {
+            cell.getActor().die();
+            isInFightMode = false;
+            return;
+        }
+        nextCell.getActor().setHealth(-getStrength());
+        setHealth(-nextCell.getActor().getStrength());
+    }
+
+    protected boolean isEnemy() { return nextCell.getActor() != null; }
+
+    public boolean isDead() { return this.health < 1; }
+
+    protected void die() {
+        if (cell.getActor() instanceof Enemy) cell.removeEnemy(this);
+        cell.setActor(null);
     }
 }
