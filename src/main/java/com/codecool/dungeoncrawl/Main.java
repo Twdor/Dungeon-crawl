@@ -12,18 +12,25 @@ import com.codecool.dungeoncrawl.logic.GameMap;
 import com.codecool.dungeoncrawl.logic.MapLoader;
 import javafx.application.Application;
 import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.effect.GaussianBlur;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.Pane;
+import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
+import javafx.scene.shape.Rectangle;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
+import javafx.stage.StageStyle;
 import javafx.util.Duration;
 
 
@@ -49,6 +56,7 @@ public class Main extends Application {
     Stage stage;
     GameOverMenu gameOverMenu;
     Scene scene;
+    BorderPane borderPane;
 
 //    GameDatabaseManager dbManager;
 
@@ -105,7 +113,7 @@ public class Main extends Application {
         pickUpItem.setOnAction(itemEvent);
         pickUpItem.setVisible(false);
 
-        BorderPane borderPane = new BorderPane();
+        borderPane = new BorderPane();
 
         borderPane.setCenter(canvas);
         borderPane.setRight(ui);
@@ -114,6 +122,52 @@ public class Main extends Application {
         scene = new Scene(borderPane);
     }
 
+    private void pauseGame(){
+        Rectangle rect = new Rectangle(50, 50, 50, 50);
+        rect.setFill(Color.CORAL);
+
+        Pane pane = new Pane(rect);
+        pane.setMinSize(600, 150);
+
+        borderPane.setEffect(new GaussianBlur());
+
+        VBox pauseRoot = new VBox(5);
+        pauseRoot.getChildren().add(new Label("Paused"));
+        pauseRoot.setStyle("-fx-background-color: rgba(255, 255, 255, 0.8);");
+        pauseRoot.setAlignment(Pos.CENTER);
+        pauseRoot.setPadding(new Insets(20));
+
+        Button saveGame = new Button("Save");
+        Button resume = new Button("Resume");
+        Button exitButton = new Button("Exit");
+        pauseRoot.getChildren().addAll(resume, saveGame, exitButton);
+
+        Stage popupStage = new Stage(StageStyle.TRANSPARENT);
+        popupStage.initOwner(stage);
+        popupStage.initModality(Modality.APPLICATION_MODAL);
+        popupStage.setScene(new Scene(pauseRoot, Color.TRANSPARENT));
+
+        stopEnemiesRefresh();
+
+        resume.setOnAction(event -> {
+            borderPane.setEffect(null);
+            popupStage.hide();
+            enemyRefresh();
+        });
+
+        exitButton.setOnAction(event -> stage.close());
+
+        saveGame.setOnAction(event -> {
+            // TODO
+            // create text input field (labelled Name)
+            // check if text is already in saved games
+            // if yes ask for input again
+            // else save game to DB
+        });
+
+        popupStage.show();
+
+    }
 
     public void startGame() {
         gameOverMenu = new GameOverMenu(this);
@@ -194,6 +248,9 @@ public class Main extends Application {
                 isKeyPressed = true;
                 refresh();
                 break;
+            case S:
+                pauseGame();
+
         }
     }
 
