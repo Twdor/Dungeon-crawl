@@ -1,7 +1,7 @@
 package com.codecool.dungeoncrawl.logic.utils;
 
 import com.codecool.dungeoncrawl.logic.Drawable;
-import com.codecool.dungeoncrawl.logic.GameMap;
+import com.codecool.dungeoncrawl.logic.GameMapManager.GameMap;
 import com.codecool.dungeoncrawl.logic.actors.*;
 import com.codecool.dungeoncrawl.logic.utils.items.Item;
 
