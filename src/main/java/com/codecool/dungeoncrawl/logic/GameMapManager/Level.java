@@ -10,8 +10,10 @@ public class Level {
 
     public static void setLevels() {
         if (levels.size() == 0) {
-            levels.put(1, "/map.txt");
-            levels.put(2, "/map2.txt");
+            levels.put(1, "/initialMap.txt");
+            levels.put(2, "/map.txt");
+            levels.put(3, "/map2.txt");
+            levels.put(4, "/map3.txt");
         }
     }
 

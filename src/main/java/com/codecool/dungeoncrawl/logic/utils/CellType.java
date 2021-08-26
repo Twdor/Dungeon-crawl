@@ -18,7 +18,12 @@ public enum CellType {
     BARS("bars"),
     BARREL("barrel"),
     CHEST("chest"),
-    LIGHT("light");
+    LIGHT("light"),
+    FIRE("fire"),
+    TENT("tent"),
+    WEB("web"),
+    WOMAN("woman");
+
 
     private final String tileName;
 
@@ -35,6 +40,9 @@ public enum CellType {
             case FLOOR:
             case OPEN_DOOR:
             case STAIRS:
+            case GRASS:
+            case PATH:
+            case WEB:
                 return true;
 //            case EMPTY:
 //            case WALL:

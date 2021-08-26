@@ -1,5 +1,6 @@
 package com.codecool.dungeoncrawl.logic;
 
+import com.codecool.dungeoncrawl.logic.GameMapManager.GameMap;
 import com.codecool.dungeoncrawl.logic.utils.Cell;
 import com.codecool.dungeoncrawl.logic.utils.CellType;
 

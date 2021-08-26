@@ -1,8 +1,6 @@
 package com.codecool.dungeoncrawl.logic.GameMapManager;
 
-import com.codecool.dungeoncrawl.logic.actors.Guard;
-import com.codecool.dungeoncrawl.logic.actors.Player;
-import com.codecool.dungeoncrawl.logic.actors.Skeleton;
+import com.codecool.dungeoncrawl.logic.actors.*;
 import com.codecool.dungeoncrawl.logic.utils.*;
 import com.codecool.dungeoncrawl.logic.utils.items.*;
 import com.codecool.dungeoncrawl.model.EnemyModel;
@@ -18,6 +16,7 @@ public class MapLoader {
 
     public static GameMap loadMap(int level, GameState gameState) {
         InputStream is = MapLoader.class.getResourceAsStream(Level.levels.get(level));
+
 
         Scanner scanner = new Scanner(is);
         int width = scanner.nextInt();
@@ -56,6 +55,14 @@ public class MapLoader {
                             if (gameState == null)
                                 map.setEnemies(new Skeleton(cell));
                             break;
+                        case '$':
+                            cell.setType(CellType.FLOOR);
+                            map.setEnemies(new Spider(cell));
+                            break;
+                        case '!':
+                            cell.setType(CellType.FLOOR);
+                            map.setEnemies(new Ghost(cell));
+                            break;
                         case 'g':
                             cell.setType(CellType.FLOOR);
                             if (gameState == null)
@@ -92,6 +99,13 @@ public class MapLoader {
                             }
                             Inventory.inventory.putIfAbsent("sword", 0);
                             break;
+                        case 'A':
+                            cell.setType(CellType.FLOOR);
+                            if (gameState == null) {
+                                map.setItems(new Axe(cell));
+                            }
+                            Inventory.inventory.putIfAbsent("axe", 0);
+                            break;
                         case 'k':
                             cell.setType(CellType.FLOOR);
                             if (gameState == null) {
@@ -106,11 +120,15 @@ public class MapLoader {
                             }
                             Inventory.inventory.putIfAbsent("armour", 0);
                             break;
+                        case 'h':
+                            cell.setType(CellType.FLOOR);
+                            if (gameState == null) {
+                                map.setItems(new Helmet(cell));
+                            }
+                            Inventory.inventory.putIfAbsent("helmet", 0);
+                            break;
                         case 'c':
                             cell.setType(CellType.CLOSED_DOOR);
-                            break;
-                        case 'F':
-                            cell.setType(CellType.FLAG);
                             break;
                         case '*':
                             cell.setType(CellType.BARS);
@@ -123,6 +141,18 @@ public class MapLoader {
                             break;
                         case 'l':
                             cell.setType(CellType.LIGHT);
+                            break;
+                        case 'F':
+                            cell.setType(CellType.FIRE);
+                            break;
+                        case 'T':
+                            cell.setType(CellType.TENT);
+                            break;
+                        case 'W':
+                            cell.setType(CellType.WEB);
+                            break;
+                        case '^':
+                            cell.setType(CellType.WOMAN);
                             break;
                         case '@':
                             cell.setType(CellType.FLOOR);
@@ -157,6 +187,12 @@ public class MapLoader {
                 break;
             case "sword":
                 map.setItems(new Sword(cell));
+                break;
+            case "axe":
+                map.setItems(new Axe(cell));
+                break;
+            case "helmet":
+                map.setItems(new Helmet(cell));
                 break;
             case "armour":
                 map.setItems(new Armour(cell));

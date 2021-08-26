@@ -12,7 +12,7 @@ public class ApplicationProperties {
         properties = new Properties();
 
         try {
-            properties.load(getClass().getClassLoader().getResourceAsStream("books.properties"));
+            properties.load(getClass().getClassLoader().getResourceAsStream("dungeon.properties"));
         } catch (IOException e) {
             Logger.getLogger(getClass().getName()).log(Level.ALL, "IOException occurred while loading properties " +
                     "file::::" + e.getMessage());

@@ -4,27 +4,16 @@ import com.codecool.dungeoncrawl.logic.utils.Cell;
 import com.codecool.dungeoncrawl.logic.utils.CellType;
 import com.codecool.dungeoncrawl.logic.utils.DevNames;
 import com.codecool.dungeoncrawl.logic.utils.items.Inventory;
-import com.codecool.dungeoncrawl.logic.utils.items.Item;
 
-import java.util.List;
-import java.util.Map;
 
 
 public class Player extends Actor {
     private String playerName;
-//    private Map<String, Integer> playerInventory;
 
     public Player(Cell cell) {
         super(cell);
         health = 1000;
         strength = 100;
-    }
-
-    public Player(Cell cell, int health, int strength, String name) {
-        super(cell);
-        this.health = health;
-        this.strength = strength;
-        playerName = name;
     }
 
     public void setPlayerName(String playerName) { this.playerName = playerName; }
@@ -55,7 +44,11 @@ public class Player extends Actor {
         return nextCell.getType() == CellType.FLOOR
                 || nextCell.getType() == CellType.OPEN_DOOR
                 || isPlayerOnItem()
-                || nextCell.getType() == CellType.STAIRS;
+                || nextCell.getType() == CellType.STAIRS
+                || nextCell.getType() == CellType.GRASS
+                || nextCell.getType() == CellType.PATH
+                || nextCell.getType() == CellType.ENTRANCE
+                || nextCell.getType() == CellType.WOMAN;
     }
 
 
@@ -67,7 +60,7 @@ public class Player extends Actor {
     }
 
     public boolean isPlayerOnStairs() {
-        return cell.getType().equals(CellType.STAIRS);
+        return cell.getType().equals(CellType.STAIRS) || cell.getType().equals(CellType.ENTRANCE);
     }
 
     private boolean playerHasKey() {

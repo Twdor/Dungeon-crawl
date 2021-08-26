@@ -6,6 +6,7 @@ import com.codecool.dungeoncrawl.logic.actors.Actor;
 import com.codecool.dungeoncrawl.logic.actors.Enemy;
 import com.codecool.dungeoncrawl.logic.actors.Player;
 import com.codecool.dungeoncrawl.logic.utils.Cell;
+import com.codecool.dungeoncrawl.logic.utils.CellType;
 import com.codecool.dungeoncrawl.logic.utils.items.Inventory;
 import com.codecool.dungeoncrawl.logic.utils.items.Item;
 import com.codecool.dungeoncrawl.menus.GameOverMenu;
@@ -40,6 +41,7 @@ import javafx.event.EventHandler;
 import javafx.stage.StageStyle;
 import javafx.util.Duration;
 import java.util.Date;
+
 import java.sql.SQLException;
 
 
@@ -48,7 +50,7 @@ public class Main extends Application {
     GameMap map;
     Canvas canvas = new Canvas(
             35 * Tiles.TILE_WIDTH,
-            28 * Tiles.TILE_WIDTH);
+            29 * Tiles.TILE_WIDTH);
     GraphicsContext context = canvas.getGraphicsContext2D();
     Timeline timeline = new Timeline(
             new KeyFrame(Duration.millis(500),
@@ -56,11 +58,12 @@ public class Main extends Application {
     double contextScale = 1.4;
     int minX, minY, maxX, maxY;
     Label healthLabel = new Label();
-    Label inventoryLabel = new Label();
     Label strengthLabel = new Label();
     Button pickUpItem = new Button("pickUp");
 
     Button sword = new Button();
+    Button axe = new Button();
+    Button helmet = new Button();
     Button armour = new Button();
     Button key = new Button();
 
@@ -72,8 +75,6 @@ public class Main extends Application {
     BorderPane borderPane;
     public GameDatabaseManager dbManager;
     MainMenu menu;
-    String title;
-    String testTitle = "testare";
 
 
     public int getCurrentLevel() { return this.currentLevel; }
@@ -125,8 +126,10 @@ public class Main extends Application {
 
         inventoryUi.add(text, 0, 0);
         inventoryUi.add(sword, 0, 3);
-        inventoryUi.add(armour, 0, 4);
-        inventoryUi.add(key, 0, 5);
+        inventoryUi.add(axe, 0, 4);
+        inventoryUi.add(armour, 0, 5);
+        inventoryUi.add(helmet, 0, 6);
+        inventoryUi.add(key, 0, 7);
         inventoryUi.add(pickUpItem, 0, 10);
 
         inventoryUi.setVgap(7);
@@ -152,10 +155,20 @@ public class Main extends Application {
         sword.setUnderline(true);
         sword.setDisable(Inventory.inventory.get("sword") == 0);
 
+        axe.setFocusTraversable(false);
+        axe.setOnAction(useItemEvent);
+        axe.setUnderline(true);
+//        axe.setDisable(Inventory.inventory.get("axe") == 0);
+
         armour.setFocusTraversable(false);
         armour.setOnAction(useItemEvent);
         armour.setUnderline(true);
         armour.setDisable(Inventory.inventory.get("armour") == 0);
+
+        helmet.setFocusTraversable(false);
+        helmet.setOnAction(useItemEvent);
+        helmet.setUnderline(true);
+//        helmet.setDisable(Inventory.inventory.get("helmet") == 0);
 
         key.setFocusTraversable(false);
         key.setOnAction(useItemEvent);
@@ -248,11 +261,11 @@ public class Main extends Application {
     private void pauseGame(){
         this.borderPane.setEffect(new GaussianBlur());
 
-        VBox pauseRoot = new VBox(5);
+        VBox pauseRoot = new VBox(50);
         pauseRoot.getChildren().add(new Label("Paused"));
         pauseRoot.setStyle("-fx-background-color: rgba(255, 255, 255, 0.8);");
         pauseRoot.setAlignment(Pos.CENTER);
-        pauseRoot.setPadding(new Insets(20));
+        pauseRoot.setPadding(new Insets(50));
 
         Button saveGame = new Button("Save");
         Button resume = new Button("Resume");
@@ -318,6 +331,10 @@ public class Main extends Application {
             sword.setDisable(Inventory.inventory.get(item) < 1);
         else if (item.equals("armour"))
             armour.setDisable(Inventory.inventory.get(item) < 1);
+        else if (item.equals("axe"))
+            armour.setDisable(Inventory.inventory.get(item) < 1);
+        else if (item.equals("helmet"))
+            armour.setDisable(Inventory.inventory.get(item) < 1);
 
 
         map.removeItem(cell.getItem());
@@ -337,6 +354,14 @@ public class Main extends Application {
             map.getPlayer().setHealth(100);
             Inventory.inventory.put("armour", Inventory.inventory.get("armour")-1);
             armour.setDisable(Inventory.inventory.get("armour") < 1);
+        } else if (s.contains("axe")) {
+            map.getPlayer().setStrength(50);
+            Inventory.inventory.put("axe", Inventory.inventory.get("axe")-1);
+            armour.setDisable(Inventory.inventory.get("axe") < 1);
+        } else if (s.contains("helmet")) {
+            map.getPlayer().setHealth(500);
+            Inventory.inventory.put("helmet", Inventory.inventory.get("helmet")-1);
+            armour.setDisable(Inventory.inventory.get("helmet") < 1);
         }
 
         refresh();
@@ -399,7 +424,7 @@ public class Main extends Application {
     }
 
     private void checkForGameOver() {
-        if (map.getPlayer().isDead()) {
+        if (map.getPlayer().isDead() || map.getPlayer().getCell().getType().equals(CellType.WOMAN)) {
             gameOverMenu.handleMenu();
         }
     }
@@ -446,6 +471,8 @@ public class Main extends Application {
         healthLabel.setText("\n" + map.getPlayer().getHealth());
         sword.setText("sword "+ Inventory.inventory.get("sword"));
         armour.setText("armour "+ Inventory.inventory.get("armour"));
+        axe.setText("axe "+ Inventory.inventory.get("axe"));
+        helmet.setText("helmet "+ Inventory.inventory.get("helmet"));
         key.setText("key "+ Inventory.inventory.get("key"));
         strengthLabel.setText("" + map.getPlayer().getStrength());
 
