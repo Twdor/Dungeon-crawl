@@ -1,25 +1,23 @@
-package com.codecool.dungeoncrawl.logic;
+package com.codecool.dungeoncrawl.logic.GameMapManager;
 
 import com.codecool.dungeoncrawl.logic.actors.Guard;
 import com.codecool.dungeoncrawl.logic.actors.Player;
 import com.codecool.dungeoncrawl.logic.actors.Skeleton;
 import com.codecool.dungeoncrawl.logic.utils.*;
-import com.codecool.dungeoncrawl.logic.utils.items.Inventory;
+import com.codecool.dungeoncrawl.logic.utils.items.*;
+import com.codecool.dungeoncrawl.model.EnemyModel;
+import com.codecool.dungeoncrawl.model.GameState;
+import com.codecool.dungeoncrawl.model.InventoryModel;
+import com.codecool.dungeoncrawl.model.ItemModel;
 
 import java.io.InputStream;
 import java.util.Scanner;
 
 
 public class MapLoader {
-    public static GameMap loadMap(int level, Player player) {
-        InputStream is;
-        if (level == 2) {
-            is = MapLoader.class.getResourceAsStream("/map2.txt");
-        } else if (level == 1) {
-            is = MapLoader.class.getResourceAsStream("/map.txt");
-        } else {
-            is = MapLoader.class.getResourceAsStream("/gameover.txt");
-        }
+
+    public static GameMap loadMap(int level, GameState gameState) {
+        InputStream is = MapLoader.class.getResourceAsStream(Level.levels.get(level));
 
         Scanner scanner = new Scanner(is);
         int width = scanner.nextInt();
@@ -28,6 +26,15 @@ public class MapLoader {
         scanner.nextLine(); // empty line
 
         GameMap map = new GameMap(width, height, CellType.EMPTY);
+
+        if (gameState != null) {
+            for (InventoryModel item : gameState.getInventory()) {
+                Inventory.inventory.put(item.getItemName(), item.getAmount());
+            }
+            manageSavedEnemies(gameState, map);
+            manageSavedItems(gameState, map);
+        }
+
         for (int y = 0; y < height; y++) {
             String line = scanner.nextLine();
             for (int x = 0; x < width; x++) {
@@ -46,11 +53,13 @@ public class MapLoader {
                             break;
                         case 's':
                             cell.setType(CellType.FLOOR);
-                            map.setEnemies(new Skeleton(cell));
+                            if (gameState == null)
+                                map.setEnemies(new Skeleton(cell));
                             break;
                         case 'g':
                             cell.setType(CellType.FLOOR);
-                            new Guard(cell);
+                            if (gameState == null)
+                                map.setEnemies(new Guard(cell));
                             break;
                         case 't':
                             cell.setType(CellType.TREE);
@@ -78,18 +87,24 @@ public class MapLoader {
                             break;
                         case 'S':
                             cell.setType(CellType.FLOOR);
-                            Inventory.setInventory("sword", 0);
-                            cell.setItem(Inventory.allPossibleItems.get("sword"));
+                            if (gameState == null) {
+                                map.setItems(new Sword(cell));
+                            }
+                            Inventory.inventory.putIfAbsent("sword", 0);
                             break;
                         case 'k':
                             cell.setType(CellType.FLOOR);
-                            Inventory.setInventory("key", 0);
-                            cell.setItem(Inventory.allPossibleItems.get("key"));
+                            if (gameState == null) {
+                                map.setItems(new Key(cell));
+                            }
+                            Inventory.inventory.putIfAbsent("key", 0);
                             break;
                         case 'a':
                             cell.setType(CellType.FLOOR);
-                            Inventory.setInventory("armour", 0);
-                            cell.setItem(Inventory.allPossibleItems.get("armour"));
+                            if (gameState == null) {
+                                map.setItems(new Armour(cell));
+                            }
+                            Inventory.inventory.putIfAbsent("armour", 0);
                             break;
                         case 'c':
                             cell.setType(CellType.CLOSED_DOOR);
@@ -111,8 +126,14 @@ public class MapLoader {
                             break;
                         case '@':
                             cell.setType(CellType.FLOOR);
-                            map.setPlayer(player == null ? new Player(cell)
-                                    : new Player(cell, player.getHealth(), player.getStrength(), player.getPlayerName()));
+                            if (gameState == null) {
+                                map.setPlayer(new Player(cell));
+                            } else {
+                                cell = map.getCell(gameState.getPlayer().getX(), gameState.getPlayer().getY());
+                                cell.setType(CellType.FLOOR);
+                                map.setPlayer(new Player(cell));
+                                map.getPlayer().setHealth(-map.getPlayer().getHealth()+gameState.getPlayer().getHp());
+                            }
                             break;
                         default:
                             throw new RuntimeException("Unrecognized character: '" + line.charAt(x) + "'");
@@ -122,4 +143,40 @@ public class MapLoader {
         }
         return map;
     }
+
+    private static void manageSavedState(String name, GameMap map, Cell cell) {
+        switch (name) {
+            case "guard":
+                map.setEnemies(new Guard(cell));
+                break;
+            case "skeleton":
+                map.setEnemies(new Skeleton(cell));
+                break;
+            case "key":
+                map.setItems(new Key(cell));
+                break;
+            case "sword":
+                map.setItems(new Sword(cell));
+                break;
+            case "armour":
+                map.setItems(new Armour(cell));
+        }
+    }
+
+    private static void manageSavedEnemies(GameState gameState, GameMap map) {
+        for (EnemyModel enemy : gameState.getEnemies()) {
+            Cell cell = map.getCell(enemy.getX(), enemy.getY());
+            cell.setType(CellType.FLOOR);
+            manageSavedState(enemy.getEnemyName(), map, cell);
+        }
+    }
+
+    private static void manageSavedItems(GameState gameState, GameMap map) {
+        for (ItemModel item : gameState.getItems()) {
+            Cell cell = map.getCell(item.getX(), item.getY());
+            cell.setType(CellType.FLOOR);
+            manageSavedState(item.getItemName(), map, cell);
+        }
+    }
+
 }
