@@ -30,7 +30,9 @@ public class Player extends Actor {
     }
 
     public boolean isPlayerOnItem() {
-        return cell.getItem() != null;
+        if (nextCell != null)
+            return nextCell.getItem() != null;
+        return false;
     }
 
     private boolean isDevName() {
@@ -61,6 +63,10 @@ public class Player extends Actor {
 
     public boolean isPlayerOnStairs() {
         return cell.getType().equals(CellType.STAIRS) || cell.getType().equals(CellType.ENTRANCE);
+    }
+
+    public boolean isGameWon() {
+        return cell.getType().equals(CellType.WOMAN);
     }
 
     private boolean playerHasKey() {

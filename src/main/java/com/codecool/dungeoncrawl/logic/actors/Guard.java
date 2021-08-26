@@ -11,8 +11,7 @@ public class Guard extends Enemy {
         this.enemyName = "guard";
     }
 
-//    @Override
-//    public String getTileName() {
-//        return "guard";
-//    }
+    @Override
+    public void move(int dx, int dy) { }
+
 }
