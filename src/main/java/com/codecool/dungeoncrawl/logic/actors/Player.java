@@ -4,11 +4,15 @@ import com.codecool.dungeoncrawl.logic.utils.Cell;
 import com.codecool.dungeoncrawl.logic.utils.CellType;
 import com.codecool.dungeoncrawl.logic.utils.DevNames;
 import com.codecool.dungeoncrawl.logic.utils.items.Inventory;
+import com.codecool.dungeoncrawl.logic.utils.items.Item;
+
+import java.util.List;
+import java.util.Map;
 
 
 public class Player extends Actor {
     private String playerName;
-
+//    private Map<String, Integer> playerInventory;
 
     public Player(Cell cell) {
         super(cell);
@@ -25,7 +29,7 @@ public class Player extends Actor {
 
     public void setPlayerName(String playerName) { this.playerName = playerName; }
 
-    public String getPlayerName() { return playerName; }
+    public String getPlayerName() { return this.playerName; }
 
     @Override
     public void move(int dx, int dy) {
@@ -58,7 +62,7 @@ public class Player extends Actor {
     public void tryToOpenDoor() {
         if (nextCell.getType().equals(CellType.CLOSED_DOOR) && playerHasKey()) {
             nextCell.setType(CellType.OPEN_DOOR);
-            Inventory.setInventory("key", -1);
+            Inventory.inventory.put("key", 0);
         }
     }
 
@@ -67,7 +71,7 @@ public class Player extends Actor {
     }
 
     private boolean playerHasKey() {
-        return Inventory.getKeyAmount() > 0;
+        return Inventory.inventory.get("key") > 0;
     }
 
     public String getTileName() {

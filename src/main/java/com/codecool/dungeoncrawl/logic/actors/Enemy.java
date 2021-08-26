@@ -4,6 +4,7 @@ import com.codecool.dungeoncrawl.logic.utils.Cell;
 
 
 public abstract class Enemy extends Actor {
+    protected String enemyName;
 
     public Enemy(Cell cell) {
         super(cell);
@@ -13,9 +14,11 @@ public abstract class Enemy extends Actor {
     public void move(int dx, int dy) {
     }
 
+    public String getEnemyName() { return this.enemyName; }
+
     @Override
     public String getTileName() {
-        return null;
+        return this.enemyName;
     }
 
 }

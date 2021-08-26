@@ -8,12 +8,11 @@ public class Guard extends Enemy {
         super(cell);
         health = 300;
         strength = 50;
-
+        this.enemyName = "guard";
     }
 
-
-    @Override
-    public String getTileName() {
-        return "guard";
-    }
+//    @Override
+//    public String getTileName() {
+//        return "guard";
+//    }
 }

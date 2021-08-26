@@ -15,10 +15,11 @@ public class Skeleton extends Enemy {
         strength = 10;
         coordinates = new HashMap<>();
         setCoordinates();
+        this.enemyName = "skeleton";
     }
 
-    @Override
-    public String getTileName() { return "skeleton"; }
+//    @Override
+//    public String getTileName() { return "skeleton"; }
 
     @Override
     public void move(int dx, int dy) {
@@ -40,6 +41,11 @@ public class Skeleton extends Enemy {
             fight();
         } else { this.isInFightMode = false; }
     }
+
+//    @Override
+//    public String getActorName() {
+//        return "skeleton";
+//    }
 
     private void setCoordinates() {
         coordinates.put("UP", new int[] {0, -1});
