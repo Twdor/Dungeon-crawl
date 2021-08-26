@@ -2,7 +2,7 @@ package com.codecool.dungeoncrawl.menus;
 
 
 import com.codecool.dungeoncrawl.Main;
-import com.codecool.dungeoncrawl.logic.GameMap;
+import com.codecool.dungeoncrawl.logic.GameMapManager.GameMap;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;

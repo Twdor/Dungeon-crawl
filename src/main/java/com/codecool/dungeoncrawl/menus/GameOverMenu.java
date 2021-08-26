@@ -57,8 +57,8 @@ public class GameOverMenu extends Menu {
     private void playAgain() {
         String characterName = map.getPlayer().getPlayerName();
         Inventory.inventory.values().clear();
-        mainController.createScene(characterName);
-        mainController.startGame();
+        mainController.createScene(characterName, null);
+        mainController.run();
     }
 
 

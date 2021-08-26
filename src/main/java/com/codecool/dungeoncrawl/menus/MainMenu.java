@@ -2,6 +2,8 @@ package com.codecool.dungeoncrawl.menus;
 
 
 import com.codecool.dungeoncrawl.Main;
+import com.codecool.dungeoncrawl.model.GameState;
+import com.codecool.dungeoncrawl.model.PlayerModel;
 import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
@@ -9,6 +11,8 @@ import javafx.scene.control.TextField;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
+
+import java.util.List;
 
 
 public class MainMenu extends Menu{
@@ -77,12 +81,14 @@ public class MainMenu extends Menu{
     }
 
     private void startNewGame(TextField textField){
-        if (textField.getText().length() > 0){
+        String characterName = textField.getText();
+        if (characterName.length() > 0){
             stage.hide();
-            mainController.createScene(textField.getText());
-            mainController.startGame();
+            mainController.createScene(characterName, null);
+            mainController.run();
         }
     }
+
 
     private void loadGameScreen(){
         Group group = new Group();
@@ -94,14 +100,34 @@ public class MainMenu extends Menu{
         context.setFill(Color.BLACK);
         context.fillRect(0, 0, canvas.getWidth(), canvas.getHeight());
         context.setFill(Color.RED);
-        context.fillText("SAVED GAMES", 360, 170);
+        context.fillText("SAVED GAMES", 360, 50);
         borderPane.setCenter(canvas);
 
-        // TODO implement getLoadSavedGames from DB
+        List<GameState> savedGames = mainController.getDbManager().getLoadGames();
+        int positionY = 100;
+        for (GameState savedState : savedGames) {
+            Button saveBtn = new Button();
+            saveBtn.setText(String.format("%s - %s", savedState.getTitle(), savedState.getSavedAt()));
+            stackPane.getChildren().add(saveBtn);
+            saveBtn.setTranslateX(200);
+            saveBtn.setTranslateY(positionY);
+            saveBtn.setOnAction(e -> {
+
+                PlayerModel playerModel = savedState.getPlayer();
+                mainController.setCurrentLevel(savedState.getCurrentMap());
+
+                mainController.createScene(playerModel.getPlayerName(), savedState);
+
+                mainController.run();
+            });
+            positionY += 30;
+        }
 
         Scene scene = new Scene(group);
         stage.setScene(scene);
         stage.show();
     }
+
+
 
 }
