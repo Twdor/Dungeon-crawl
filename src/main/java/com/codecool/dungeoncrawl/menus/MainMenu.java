@@ -5,12 +5,12 @@ import com.codecool.dungeoncrawl.Main;
 import com.codecool.dungeoncrawl.model.GameState;
 import com.codecool.dungeoncrawl.model.PlayerModel;
 import javafx.geometry.Insets;
-import javafx.geometry.Pos;
 import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.GridPane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 
@@ -95,24 +95,32 @@ public class MainMenu extends Menu{
     private void loadGameScreen(){
         Group group = new Group();
         BorderPane borderPane = new BorderPane();
-        StackPane stackPane = new StackPane();
+        GridPane stackPane = new GridPane();
         group.getChildren().addAll(borderPane, stackPane);
         stage.hide();
         context.clearRect(0.0, 0.0, 700.0, 700.0);
-        context.setFill(Color.CORAL);
+        context.setFill(Color.GAINSBORO);
         context.fillRect(0, 0, canvas.getWidth(), canvas.getHeight());
-        context.setFill(Color.BLACK);
-//        context.fillText("SAVED GAMES", 360, 50);
         borderPane.setCenter(canvas);
 
         List<GameState> savedGames = mainController.getDbManager().getLoadGames();
-        int positionY = 100;
+        stackPane.setPadding(new Insets(10));
+        stackPane.setVgap(10);
+        int positionY = 1;
         for (GameState savedState : savedGames) {
             Button saveBtn = new Button();
-            saveBtn.setText(String.format("%s - %s - %s - %s", savedState.getTitle(), savedState.getSavedAt(), savedState.getCurrentMap(), savedState.getPlayer().getPlayerName()));
-            stackPane.getChildren().add(saveBtn);
-            saveBtn.setTranslateX(360);
-            saveBtn.setTranslateY(positionY);
+            saveBtn.setText(String.format(
+                    "Title: %s%n" +
+                    "Saved at: %s%n" +
+                    "Level: %s%n" +
+                    "Nick: %s%n",
+                    savedState.getTitle(),
+                    savedState.getSavedAt(),
+                    savedState.getCurrentMap(),
+                    savedState.getPlayer().getPlayerName())
+            );
+            saveBtn.setUnderline(true);
+            stackPane.add(saveBtn, 1, positionY);
             saveBtn.setOnAction(e -> {
 
                 PlayerModel playerModel = savedState.getPlayer();
@@ -122,7 +130,7 @@ public class MainMenu extends Menu{
 
                 mainController.run();
             });
-            positionY += 50;
+            positionY += 1;
         }
 
         Scene scene = new Scene(group);

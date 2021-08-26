@@ -6,7 +6,6 @@ import com.codecool.dungeoncrawl.logic.actors.Actor;
 import com.codecool.dungeoncrawl.logic.actors.Enemy;
 import com.codecool.dungeoncrawl.logic.actors.Player;
 import com.codecool.dungeoncrawl.logic.utils.Cell;
-import com.codecool.dungeoncrawl.logic.utils.CellType;
 import com.codecool.dungeoncrawl.logic.utils.items.Inventory;
 import com.codecool.dungeoncrawl.logic.utils.items.Item;
 import com.codecool.dungeoncrawl.menus.GameOverMenu;
@@ -73,11 +72,11 @@ public class Main extends Application {
     GameOverMenu gameOverMenu;
     Scene scene;
     BorderPane borderPane;
-    public GameDatabaseManager dbManager;
+    GameDatabaseManager dbManager;
     MainMenu menu;
+    VBox vBox;
+    Stage popupStage;
 
-
-    public int getCurrentLevel() { return this.currentLevel; }
 
     public void setCurrentLevel(int currentLevel) { this.currentLevel = currentLevel; }
 
@@ -103,6 +102,7 @@ public class Main extends Application {
         this.stage = primaryStage;
 
         menu = new MainMenu(this);
+        gameOverMenu = new GameOverMenu(this);
         menu.handleMenu();
     }
 
@@ -120,11 +120,11 @@ public class Main extends Application {
         ui.setPrefWidth(200);
         ui.setPadding(new Insets(10));
 
-        Text text = new Text("Inventory: ");
-        text.setFont(Font.font("Arial", FontWeight.BOLD, 20));
-        text.setFill(Color.CORAL);
+        Text inventoryLabel = new Text("Inventory: ");
+        inventoryLabel.setFont(Font.font("Arial", FontWeight.BOLD, 20));
+        inventoryLabel.setFill(Color.CORAL);
 
-        inventoryUi.add(text, 0, 0);
+        inventoryUi.add(inventoryLabel, 0, 0);
         inventoryUi.add(sword, 0, 3);
         inventoryUi.add(axe, 0, 4);
         inventoryUi.add(armour, 0, 5);
@@ -134,10 +134,10 @@ public class Main extends Application {
 
         inventoryUi.setVgap(7);
 
-
-        ui.add(new Label(characterName), 0, 3, 1, 1);
-
-        ui.add(new Label("Character name: "), 0, 0); //
+        Text characterNameLabel = new Text(characterName);
+        characterNameLabel.setFont(Font.font("Arial", FontWeight.BOLD, 25));
+        characterNameLabel.setFill(Color.CORAL);
+        ui.add(characterNameLabel, 0, 0);
 
         ui.add(new Label(""), 0, 3); //empty space
 
@@ -153,22 +153,22 @@ public class Main extends Application {
         sword.setFocusTraversable(false);
         sword.setOnAction(useItemEvent);
         sword.setUnderline(true);
-        sword.setDisable(Inventory.inventory.get("sword") == 0);
+        sword.setDisable(Inventory.inventory.get("sword") < 1);
 
         axe.setFocusTraversable(false);
         axe.setOnAction(useItemEvent);
         axe.setUnderline(true);
-        axe.setDisable(Inventory.inventory.get("axe") == 0);
+        axe.setDisable(Inventory.inventory.get("axe") < 1);
 
         armour.setFocusTraversable(false);
         armour.setOnAction(useItemEvent);
         armour.setUnderline(true);
-        armour.setDisable(Inventory.inventory.get("armour") == 0);
+        armour.setDisable(Inventory.inventory.get("armour") < 1);
 
         helmet.setFocusTraversable(false);
         helmet.setOnAction(useItemEvent);
         helmet.setUnderline(true);
-        helmet.setDisable(Inventory.inventory.get("helmet") == 0);
+        helmet.setDisable(Inventory.inventory.get("helmet") < 1);
 
         key.setFocusTraversable(false);
         key.setOnAction(useItemEvent);
@@ -185,7 +185,6 @@ public class Main extends Application {
     }
 
     public void run() {
-        gameOverMenu = new GameOverMenu(this);
 
         stage.setScene(scene);
         enemyRefresh();
@@ -198,102 +197,105 @@ public class Main extends Application {
     }
 
     private void save(){
-        VBox savePauseRoot = new VBox(5);
-        savePauseRoot.getChildren().add(new Label("SAVE GAME"));
-        savePauseRoot.setStyle("-fx-background-color: rgba(255, 255, 255, 0.8);");
-        savePauseRoot.setAlignment(Pos.CENTER);
-        savePauseRoot.setPadding(new Insets(350));
+        this.borderPane.setEffect(new GaussianBlur());
+
+        manageVBox("SAVE GAME", 5, 350);
 
         TextField textField = new TextField();
         textField.setStyle("-fx-max-width: 150");
         textField.setPromptText("Title");
         Button save = new Button("Save");
         Button cancel = new Button("Cancel");
-        savePauseRoot.getChildren().addAll(textField, save, cancel);
+        this.vBox.getChildren().addAll(textField, save, cancel);
 
-        Stage popupStage = new Stage(StageStyle.TRANSPARENT);
-        popupStage.initOwner(stage);
-        popupStage.initModality(Modality.APPLICATION_MODAL);
-        popupStage.setScene(new Scene(savePauseRoot, Color.TRANSPARENT));
+        managePopupStage();
 
         stopEnemiesRefresh();
 
         cancel.setOnAction(event -> {
-            borderPane.setEffect(null);
-            popupStage.hide();
+            this.borderPane.setEffect(null);
+            this.popupStage.hide();
             enemyRefresh();
         });
 
         save.setOnAction(event -> {
             if (textField.getText().length() > 0) {
-                int[] ids = dbManager.getIdsByTitle(textField.getText());
+                int[] ids = this.dbManager.getIdsByTitle(textField.getText());
                 if (ids != null) {
                     Text warningText = new Text();
                     warningText.setText("This title already exists, do you want to override the save or new save?");
                     Button override = new Button("Override");
                     Button newSave = new Button("New Save");
-                    savePauseRoot.getChildren().remove(save);
-                    savePauseRoot.getChildren().addAll(warningText, override, newSave);
+                    this.vBox.getChildren().remove(save);
+                    this.vBox.getChildren().addAll(warningText, override, newSave);
                     override.setOnAction(e -> {
-                        borderPane.setEffect(null);
-                        popupStage.hide();
+                        this.borderPane.setEffect(null);
+                        this.popupStage.hide();
                         overrideSavedGame(textField.getText(), ids);
                         enemyRefresh();
                     });
                     newSave.setOnAction(e -> {
-                        borderPane.setEffect(null);
-                        popupStage.hide();
+                        this.borderPane.setEffect(null);
+                        this.popupStage.hide();
                         saveNewGame(textField.getText());
                         enemyRefresh();
                     });
                 } else {
-                    borderPane.setEffect(null);
-                    popupStage.hide();
+                    this.borderPane.setEffect(null);
+                    this.popupStage.hide();
                     saveNewGame(textField.getText());
                     enemyRefresh();
                 }
             }
         });
 
-        popupStage.show();
+        this.popupStage.show();
+    }
+
+    private void manageVBox(String label, int v, int insets) {
+        this.vBox = new VBox(v);
+        this.vBox.getChildren().add(new Label(label));
+        this.vBox.setStyle("-fx-background-color: rgba(255, 255, 255, 0.8);");
+        this.vBox.setAlignment(Pos.CENTER);
+        this.vBox.setPadding(new Insets(insets));
+    }
+
+    private void managePopupStage() {
+        this.popupStage = new Stage(StageStyle.TRANSPARENT);
+        this.popupStage.initOwner(this.stage);
+        this.popupStage.initModality(Modality.APPLICATION_MODAL);
+        this.popupStage.setScene(new Scene(this.vBox, Color.TRANSPARENT));
     }
 
     private void pauseGame(){
         this.borderPane.setEffect(new GaussianBlur());
 
-        VBox pauseRoot = new VBox(50);
-        pauseRoot.getChildren().add(new Label("Paused"));
-        pauseRoot.setStyle("-fx-background-color: rgba(255, 255, 255, 0.8);");
-        pauseRoot.setAlignment(Pos.CENTER);
-        pauseRoot.setPadding(new Insets(50));
+        manageVBox("Paused",10,  50);
 
         Button saveGame = new Button("Save");
         Button resume = new Button("Resume");
         Button exitButton = new Button("Exit");
-        pauseRoot.getChildren().addAll(resume, saveGame, exitButton);
+        this.vBox.getChildren().addAll(resume, saveGame, exitButton);
 
-        Stage popupStage = new Stage(StageStyle.TRANSPARENT);
-        popupStage.initOwner(stage);
-        popupStage.initModality(Modality.APPLICATION_MODAL);
-        popupStage.setScene(new Scene(pauseRoot, Color.TRANSPARENT));
+        managePopupStage();
 
         stopEnemiesRefresh();
 
         resume.setOnAction(event -> {
-            borderPane.setEffect(null);
-            popupStage.hide();
+            this.borderPane.setEffect(null);
+            this.popupStage.hide();
             enemyRefresh();
         });
 
         exitButton.setOnAction(event -> stage.close());
 
         saveGame.setOnAction(event -> {
-            borderPane.setEffect(null);
-            popupStage.hide();
-            save();
+            this.borderPane.setEffect(null);
+            this.popupStage.hide();
+            this.save();
         });
 
-        popupStage.show();
+        this.popupStage.show();
 
     }
 
@@ -327,18 +329,25 @@ public class Main extends Application {
 
         Inventory.inventory.put(item,Inventory.inventory.get(item)+1);
 
-        if (item.equals("sword"))
-            sword.setDisable(Inventory.inventory.get(item) < 1);
-        else if (item.equals("armour"))
-            armour.setDisable(Inventory.inventory.get(item) < 1);
-        else if (item.equals("axe"))
-            axe.setDisable(Inventory.inventory.get(item) < 1);
-        else if (item.equals("helmet"))
-            helmet.setDisable(Inventory.inventory.get(item) < 1);
+        switch (item) {
+            case "sword":
+                sword.setDisable(Inventory.inventory.get(item) < 1);
+                break;
+            case "armour":
+                armour.setDisable(Inventory.inventory.get(item) < 1);
+                break;
+            case "axe":
+                axe.setDisable(Inventory.inventory.get(item) < 1);
+                break;
+            case "helmet":
+                helmet.setDisable(Inventory.inventory.get(item) < 1);
+                break;
+        }
 
 
         map.removeItem(cell.getItem());
         cell.deleteItem();
+        cell.setType(cell.getType());
 
         refresh();
         pickUpItem.setVisible(false);
@@ -357,11 +366,11 @@ public class Main extends Application {
         } else if (s.contains("axe")) {
             map.getPlayer().setStrength(50);
             Inventory.inventory.put("axe", Inventory.inventory.get("axe")-1);
-            armour.setDisable(Inventory.inventory.get("axe") < 1);
+            axe.setDisable(Inventory.inventory.get("axe") < 1);
         } else if (s.contains("helmet")) {
             map.getPlayer().setHealth(50);
             Inventory.inventory.put("helmet", Inventory.inventory.get("helmet")-1);
-            armour.setDisable(Inventory.inventory.get("helmet") < 1);
+            helmet.setDisable(Inventory.inventory.get("helmet") < 1);
         }
 
         refresh();
@@ -423,12 +432,6 @@ public class Main extends Application {
         }
     }
 
-    private void checkForGameOver() {
-        if (map.getPlayer().isDead() || map.getPlayer().getCell().getType().equals(CellType.WOMAN)) {
-            gameOverMenu.handleMenu();
-        }
-    }
-
     private void checkForNextLevel() {
         if (map.getPlayer().isPlayerOnStairs()) {
             Player player = map.getPlayer();
@@ -443,7 +446,11 @@ public class Main extends Application {
     }
 
     private void refresh() {
-        checkForGameOver();
+        if (map.getPlayer().isDead() || map.getPlayer().isGameWon()) {
+            stopEnemiesRefresh();
+            gameOverMenu.handleMenu();
+            return;
+        }
         checkForNextLevel();
 
         if (!isKeyPressed && isAtLeastOneEnemyAlive)
@@ -497,23 +504,17 @@ public class Main extends Application {
         dbManager.deleteItemByGameStateId(gameStateId);
         dbManager.deleteInventoryByGameStateId(gameStateId);
 
-        for (Enemy enemy : this.map.getEnemies()) {
-            this.dbManager.saveEnemy(enemy, gameStateId);
-        }
-        for (Item item : this.map.getItems()) {
-            this.dbManager.saveItem(item, gameStateId);
-        }
-        for (String item : Inventory.inventory.keySet()) {
-            this.dbManager.saveInventory(item, Inventory.inventory.get(item), gameStateId);
-        }
+        saveEnemiesItemsInventory(gameStateId);
     }
 
     private void saveNewGame(String title) {
         this.dbManager.savePlayer(this.map.getPlayer());
         Date date = new Date();
         int gameStateId =  this.dbManager.saveGameState(title, this.currentLevel, new java.sql.Date(date.getTime()));
+        saveEnemiesItemsInventory(gameStateId);
+    }
 
-
+    private void saveEnemiesItemsInventory(int gameStateId) {
         for (Enemy enemy : this.map.getEnemies()) {
             this.dbManager.saveEnemy(enemy, gameStateId);
         }

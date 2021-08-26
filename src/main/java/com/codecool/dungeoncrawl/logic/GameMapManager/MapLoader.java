@@ -33,6 +33,7 @@ public class MapLoader {
             manageSavedEnemies(gameState, map);
             manageSavedItems(gameState, map);
         }
+        Inventory.inventory.putIfAbsent("key", 0);
 
         for (int y = 0; y < height; y++) {
             String line = scanner.nextLine();
@@ -57,11 +58,13 @@ public class MapLoader {
                             break;
                         case '$':
                             cell.setType(CellType.FLOOR);
-                            map.setEnemies(new Spider(cell));
+                            if (gameState == null)
+                                map.setEnemies(new Spider(cell));
                             break;
                         case '!':
                             cell.setType(CellType.FLOOR);
-                            map.setEnemies(new Ghost(cell));
+                            if (gameState == null)
+                                map.setEnemies(new Ghost(cell));
                             break;
                         case 'g':
                             cell.setType(CellType.FLOOR);
@@ -155,7 +158,7 @@ public class MapLoader {
                             cell.setType(CellType.WOMAN);
                             break;
                         case '@':
-                            cell.setType(CellType.FLOOR);
+                            cell.setType(level != 1 ? CellType.FLOOR : CellType.PATH);
                             if (gameState == null) {
                                 map.setPlayer(new Player(cell));
                             } else {
@@ -176,6 +179,10 @@ public class MapLoader {
 
     private static void manageSavedState(String name, GameMap map, Cell cell) {
         switch (name) {
+            case "spider":
+                map.setEnemies(new Spider(cell));
+            case "ghost":
+                map.setEnemies(new Ghost(cell));
             case "guard":
                 map.setEnemies(new Guard(cell));
                 break;
