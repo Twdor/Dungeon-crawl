@@ -158,7 +158,7 @@ public class Main extends Application {
         axe.setFocusTraversable(false);
         axe.setOnAction(useItemEvent);
         axe.setUnderline(true);
-//        axe.setDisable(Inventory.inventory.get("axe") == 0);
+        axe.setDisable(Inventory.inventory.get("axe") == 0);
 
         armour.setFocusTraversable(false);
         armour.setOnAction(useItemEvent);
@@ -168,7 +168,7 @@ public class Main extends Application {
         helmet.setFocusTraversable(false);
         helmet.setOnAction(useItemEvent);
         helmet.setUnderline(true);
-//        helmet.setDisable(Inventory.inventory.get("helmet") == 0);
+        helmet.setDisable(Inventory.inventory.get("helmet") == 0);
 
         key.setFocusTraversable(false);
         key.setOnAction(useItemEvent);
@@ -332,9 +332,9 @@ public class Main extends Application {
         else if (item.equals("armour"))
             armour.setDisable(Inventory.inventory.get(item) < 1);
         else if (item.equals("axe"))
-            armour.setDisable(Inventory.inventory.get(item) < 1);
+            axe.setDisable(Inventory.inventory.get(item) < 1);
         else if (item.equals("helmet"))
-            armour.setDisable(Inventory.inventory.get(item) < 1);
+            helmet.setDisable(Inventory.inventory.get(item) < 1);
 
 
         map.removeItem(cell.getItem());
@@ -359,7 +359,7 @@ public class Main extends Application {
             Inventory.inventory.put("axe", Inventory.inventory.get("axe")-1);
             armour.setDisable(Inventory.inventory.get("axe") < 1);
         } else if (s.contains("helmet")) {
-            map.getPlayer().setHealth(500);
+            map.getPlayer().setHealth(50);
             Inventory.inventory.put("helmet", Inventory.inventory.get("helmet")-1);
             armour.setDisable(Inventory.inventory.get("helmet") < 1);
         }
