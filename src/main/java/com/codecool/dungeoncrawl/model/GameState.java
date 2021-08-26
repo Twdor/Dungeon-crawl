@@ -4,47 +4,57 @@ import java.util.ArrayList;
 import java.sql.Date;
 import java.util.List;
 
+
 public class GameState extends BaseModel {
-    private Date savedAt;
-    private String currentMap;
-    private List<String> discoveredMaps = new ArrayList<>();
+    private final Date savedAt;
+    private final String title;
+    private final int currentMap;
+    private final List<EnemyModel> enemies = new ArrayList<>();
+    private final List<ItemModel> items = new ArrayList<>();
+    private final List<InventoryModel> inventory = new ArrayList<>();
     private PlayerModel player;
 
-    public GameState(String currentMap, Date savedAt, PlayerModel player) {
+
+    public GameState(String title, int currentMap, Date savedAt, PlayerModel player) {
+        this.title = title;
         this.currentMap = currentMap;
         this.savedAt = savedAt;
         this.player = player;
     }
 
-    public Date getSavedAt() {
-        return savedAt;
-    }
-
-    public void setSavedAt(Date savedAt) {
+    public GameState(String title, int currentMap, Date savedAt) {
+        this.title = title;
+        this.currentMap = currentMap;
         this.savedAt = savedAt;
     }
 
-    public String getCurrentMap() {
-        return currentMap;
+    public String getTitle() { return this.title; }
+
+    public Date getSavedAt() { return this.savedAt; }
+
+    public int getCurrentMap() {
+        return this.currentMap;
     }
 
-    public void setCurrentMap(String currentMap) {
-        this.currentMap = currentMap;
+    public void setEnemies(EnemyModel enemy) {
+        this.enemies.add(enemy);
     }
 
-    public List<String> getDiscoveredMaps() {
-        return discoveredMaps;
-    }
-
-    public void addDiscoveredMap(String map) {
-        this.discoveredMaps.add(map);
-    }
+    public List<EnemyModel> getEnemies () { return this.enemies; }
 
     public PlayerModel getPlayer() {
-        return player;
+        return this.player;
     }
 
     public void setPlayer(PlayerModel player) {
         this.player = player;
     }
+
+    public void setItems(ItemModel item) { this.items.add(item); }
+
+    public List<ItemModel> getItems() { return this.items; }
+
+    public void setInventory(InventoryModel inventory) { this.inventory.add(inventory); }
+
+    public List<InventoryModel> getInventory() { return this.inventory; }
 }
