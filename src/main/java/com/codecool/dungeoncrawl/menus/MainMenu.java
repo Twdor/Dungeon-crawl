@@ -4,6 +4,8 @@ package com.codecool.dungeoncrawl.menus;
 import com.codecool.dungeoncrawl.Main;
 import com.codecool.dungeoncrawl.model.GameState;
 import com.codecool.dungeoncrawl.model.PlayerModel;
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
@@ -97,19 +99,19 @@ public class MainMenu extends Menu{
         group.getChildren().addAll(borderPane, stackPane);
         stage.hide();
         context.clearRect(0.0, 0.0, 700.0, 700.0);
-        context.setFill(Color.BLACK);
+        context.setFill(Color.CORAL);
         context.fillRect(0, 0, canvas.getWidth(), canvas.getHeight());
-        context.setFill(Color.RED);
-        context.fillText("SAVED GAMES", 360, 50);
+        context.setFill(Color.BLACK);
+//        context.fillText("SAVED GAMES", 360, 50);
         borderPane.setCenter(canvas);
 
         List<GameState> savedGames = mainController.getDbManager().getLoadGames();
         int positionY = 100;
         for (GameState savedState : savedGames) {
             Button saveBtn = new Button();
-            saveBtn.setText(String.format("%s - %s", savedState.getTitle(), savedState.getSavedAt()));
+            saveBtn.setText(String.format("%s - %s - %s - %s", savedState.getTitle(), savedState.getSavedAt(), savedState.getCurrentMap(), savedState.getPlayer().getPlayerName()));
             stackPane.getChildren().add(saveBtn);
-            saveBtn.setTranslateX(200);
+            saveBtn.setTranslateX(360);
             saveBtn.setTranslateY(positionY);
             saveBtn.setOnAction(e -> {
 
@@ -120,7 +122,7 @@ public class MainMenu extends Menu{
 
                 mainController.run();
             });
-            positionY += 30;
+            positionY += 50;
         }
 
         Scene scene = new Scene(group);

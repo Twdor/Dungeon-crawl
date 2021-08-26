@@ -2,12 +2,15 @@ package com.codecool.dungeoncrawl.menus;
 
 import com.codecool.dungeoncrawl.Main;
 import com.codecool.dungeoncrawl.logic.utils.items.Inventory;
+import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 
 
 public class GameOverMenu extends Menu {
+    String gameResult;
 
     public GameOverMenu(Main mainController) {
         super(mainController);
@@ -16,8 +19,8 @@ public class GameOverMenu extends Menu {
 
     @Override
     protected void beforeMenuDisplayEvents() {
+        this.gameResult = mainController.getMap().getPlayer().isDead() ? "GAME OVER" : "You Won!";
         createTitleAndBackground();
-        mainController.stopEnemiesRefresh();
     }
 
     @Override
@@ -25,7 +28,7 @@ public class GameOverMenu extends Menu {
         context.setFill(Color.BLACK);
         context.fillRect(0, 0, canvas.getWidth(), canvas.getHeight());
         context.setFill(Color.RED);
-        context.fillText("GAME OVER", 360, 220);
+        context.fillText(this.gameResult, 360, 220);
     }
 
     @Override
@@ -55,8 +58,9 @@ public class GameOverMenu extends Menu {
     }
 
     private void playAgain() {
-        String characterName = map.getPlayer().getPlayerName();
+        String characterName = mainController.getMap().getPlayer().getPlayerName();
         Inventory.inventory.values().clear();
+        mainController.setCurrentLevel(1);
         mainController.createScene(characterName, null);
         mainController.run();
     }
