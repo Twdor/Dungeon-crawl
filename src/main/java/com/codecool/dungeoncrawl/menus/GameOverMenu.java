@@ -19,7 +19,7 @@ public class GameOverMenu extends Menu {
 
     @Override
     protected void beforeMenuDisplayEvents() {
-        this.gameResult = mainController.getMap().getPlayer().isDead() ? "GAME OVER" : "You Won!";
+        this.gameResult = mainController.getMap().getPlayer().isDead() ? "GAME OVER" : "You Won!!";
         createTitleAndBackground();
     }
 

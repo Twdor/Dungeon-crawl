@@ -4,15 +4,23 @@ package com.codecool.dungeoncrawl.menus;
 import com.codecool.dungeoncrawl.Main;
 import com.codecool.dungeoncrawl.model.GameState;
 import com.codecool.dungeoncrawl.model.PlayerModel;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.geometry.Insets;
+import javafx.geometry.Orientation;
+import javafx.geometry.Pos;
 import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.ScrollBar;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
+import javafx.scene.text.Font;
+import javafx.scene.text.FontWeight;
+import javafx.scene.text.Text;
 
 import java.util.List;
 
@@ -96,12 +104,35 @@ public class MainMenu extends Menu{
         Group group = new Group();
         BorderPane borderPane = new BorderPane();
         GridPane stackPane = new GridPane();
+
+        Button cancel = new Button("cancel");
+        cancel.setStyle("-fx-background-color: linear-gradient(#ff5400, #be1d00);"+
+                "-fx-background-radius: 30;" +
+                "-fx-background-insets: 0,1,2,3,0;" +
+                "-fx-text-fill: #654b00;" +
+                "-fx-padding: 10 20 10 20;");
+        cancel.setOnAction(event -> {
+            handleMenu();
+        });
+
+//        cancel.setTranslateX(360);
+
+
         group.getChildren().addAll(borderPane, stackPane);
         stage.hide();
         context.clearRect(0.0, 0.0, 700.0, 700.0);
-        context.setFill(Color.GAINSBORO);
+        context.setFill(Color.BLACK);
         context.fillRect(0, 0, canvas.getWidth(), canvas.getHeight());
         borderPane.setCenter(canvas);
+        stage.setTitle("Saved Games");
+
+        ScrollBar sc = new ScrollBar();
+        sc.setLayoutX(canvas.getWidth()-sc.getWidth());
+        sc.setMin(0);
+        sc.setOrientation(Orientation.VERTICAL);
+        sc.setPrefHeight(180);
+        sc.setMax(360);
+
 
         List<GameState> savedGames = mainController.getDbManager().getLoadGames();
         stackPane.setPadding(new Insets(10));
@@ -109,18 +140,27 @@ public class MainMenu extends Menu{
         int positionY = 1;
         for (GameState savedState : savedGames) {
             Button saveBtn = new Button();
+
             saveBtn.setText(String.format(
-                    "Title: %s%n" +
-                    "Saved at: %s%n" +
-                    "Level: %s%n" +
-                    "Nick: %s%n",
+                    "Title:   %s%n" +
+                    "Saved at:   %s%n" +
+                    "Level:   %s%n" +
+                    "Nick:   %s%n",
                     savedState.getTitle(),
                     savedState.getSavedAt(),
                     savedState.getCurrentMap(),
                     savedState.getPlayer().getPlayerName())
             );
+            saveBtn.setStyle(
+                    "-fx-border-color: #ff0000;" +
+                    " -fx-border-width: 5px;" +
+                    "-fx-text-fill: #ff0000;");
+//                    "-fx-font-size: 0.5em;");
             saveBtn.setUnderline(true);
             stackPane.add(saveBtn, 1, positionY);
+
+            sc.valueProperty().addListener((ov, old_val, new_val) -> group.setLayoutY(-new_val.doubleValue()));
+
             saveBtn.setOnAction(e -> {
 
                 PlayerModel playerModel = savedState.getPlayer();
@@ -132,6 +172,14 @@ public class MainMenu extends Menu{
             });
             positionY += 1;
         }
+        if (savedGames.isEmpty()) {
+            Text noSaves = new Text("No current saved game! ");
+            noSaves.setFont(Font.font("Arial", FontWeight.BOLD, 20));
+            noSaves.setFill(Color.RED);
+            stackPane.add(noSaves, 1, positionY);
+        }
+
+        stackPane.add(cancel, 1, positionY+1);
 
         Scene scene = new Scene(group);
         stage.setScene(scene);
