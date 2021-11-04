@@ -21,10 +21,10 @@ a lot by tabletop RPGs. Roguelikes have the following in common usually:
 - The state of the game is saved in Data base.
 
 ## Technologies used
-Java, JavaFX, JUnit, Maven, Postgres 
+Java, JavaFX, JUnit, Maven, PostgreSQL 
 
 ## Installation
-Execute schema_ddl.sql intro your psql db.
+Execute schema_ddl.sql into your psql db.
 Create dungeon.properties in resources, add Db name, user and password.
 
 ## Implementation
