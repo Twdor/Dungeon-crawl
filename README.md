@@ -2,6 +2,8 @@
 
 ## Description
 
+This is a team project.
+
 [Roguelikes](https://en.wikipedia.org/wiki/Roguelike) are one of the oldest
 types of video games, the earliest ones were made in the 70s, they were inspired
 a lot by tabletop RPGs. Roguelikes have the following in common usually:
