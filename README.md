@@ -33,5 +33,5 @@ Last level:
 ![Last Level](./src/main/resources/lastLevel.png)
 
 Pause game:
-![Pause game](./src/main/resources/pauseGame.png)
+![Pause game](./src/main/resources/gamePause.png)
 
